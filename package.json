@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "jsdom": "25.0.1",
+    "katex": "^0.16.11",
     "mathjs": "13.2.0"
   }
 }

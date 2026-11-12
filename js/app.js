@@ -13,7 +13,8 @@ import { demandExpr, supplyExpr } from './topics/lib.js';
 import { czText } from './topics/lib.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { initAuth, currentUser, signOut, onAuthEvent } from './auth.js';
-import { initProgress, setProgressUser, flushQueue } from './progress.js';
+import { initProgress, setProgressUser, flushQueue, topicStats, recommendNext, listExams } from './progress.js';
+import { renderFormulas } from './ui/formulas.js';
 import { initContent, loadFixedProblems } from './content.js';
 import { mountPractice, buildFixedProblem, FIXED_TYPE, FIXED_TITLE } from './ui/practice.js';
 import { renderLogin, renderNewPassword } from './ui/login.js';
@@ -196,6 +197,36 @@ function viewHome(main) {
   });
   main.appendChild(rows);
   main.appendChild(h(doc, 'p', { class: 'home-links' }, h(doc, 'a', { href: FORMULAS_HREF, text: 'Přehled vzorců' })));
+  if (!isGuest) addProgress(main, rows);
+}
+
+// Přihlášený uživatel: úspěšnost po tématech, doporučení a poslední zkoušky (z databáze, jen jeho vlastní).
+function addProgress(main, rows) {
+  topicStats().then((stats) => {
+    if (!main.isConnected || stats.length === 0) return;
+    const withContent = topics.filter((t) => t.types.length > 0).map((t) => t.id);
+    const links = rows.querySelectorAll('.topic-row');
+    topics.forEach((t, i) => {
+      const st = stats.find((x) => x.topic === t.id);
+      if (!st || !links[i]) return;
+      links[i].appendChild(h(doc, 'span', { class: 'topic-meta', text: `${st.tried} pokusů, ${Math.round(st.correctRate * 100)} % správně` }));
+    });
+    const next = topics.find((t) => t.id === recommendNext(stats, withContent));
+    if (next) {
+      main.insertBefore(h(doc, 'p', { class: 'recommend' }, [
+        'Doporučení: procvič téma ', h(doc, 'a', { href: routeHref(next.id, 'procvicovani'), text: next.title }), '.',
+      ]), main.querySelector('.section-title'));
+    }
+  }).catch(() => {});
+  listExams().then((list) => {
+    if (!main.isConnected || list.length === 0) return;
+    const box = h(doc, 'section', { class: 'recent-exams' }, [h(doc, 'h2', { class: 'section-title', text: 'Poslední testy nanečisto' })]);
+    for (const r of list.slice(0, 3)) {
+      const when = new Date(r.created_at).toLocaleDateString('cs-CZ');
+      box.appendChild(h(doc, 'p', { text: `${EXAMS[r.kind]?.title ?? r.kind}, ${when}: ${czText(Number(r.points))} z ${czText(Number(r.max_points))} b` }));
+    }
+    main.appendChild(box);
+  }).catch(() => {});
 }
 
 function viewNotFound(main) {
@@ -204,6 +235,13 @@ function viewNotFound(main) {
     'Adresa neodpovídá žádnému tématu. ',
     h(doc, 'a', { href: '#/', text: 'Zpět na seznam témat' }),
   ]));
+}
+
+function viewFormulas(main) {
+  main.appendChild(h(doc, 'h1', { class: 'page-title', text: 'Přehled vzorců' }));
+  const body = h(doc, 'div', { class: 'formulas' });
+  main.appendChild(body);
+  renderFormulas(body);
 }
 
 function viewPlaceholder(main, title, text) {
@@ -328,7 +366,7 @@ function render() {
   if (route.name === 'home') viewHome(main);
   else if (route.name === 'topic') viewTopic(main, route);
   else if (route.name === 'exam') viewExam(main, route.kind);
-  else if (route.name === 'formulas') viewPlaceholder(main, 'Přehled vzorců', 'Přehled vzorců se připravuje.');
+  else if (route.name === 'formulas') viewFormulas(main);
   else viewNotFound(main);
   let title = null;
   if (route.name === 'topic') title = topics.find((x) => x.id === route.id)?.title;

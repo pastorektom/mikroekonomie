@@ -1,0 +1,62 @@
+// Vlastní přehled vzorců po tématech (hotová témata). Není to oficiální list ke zkoušce.
+// Každá položka: { name, tex, note? }. Všechny vzorce testuje tests/formulas.test.js (KaTeX bez chyby).
+export const DISCLAIMER = 'Vlastní přehled pro učení. Je neoficiální a nenahrazuje list vzorců, který případně povolí vyučující.';
+
+export const FORMULAS = [
+  { topic: 'trh', items: [
+    { name: 'Lineární poptávka a nabídka', tex: 'Q_D=a-bP,\\qquad Q_S=c+dP', note: 'b a d jsou kladná čísla.' },
+    { name: 'Rovnovážná cena', tex: 'P_E=\\frac{a-c}{b+d}', note: 'Z podmínky $Q_D=Q_S$.' },
+    { name: 'Rovnovážné množství', tex: 'Q_E=a-b\\,P_E=c+d\\,P_E' },
+    { name: 'Rovnováha z rovnic P(Q)', tex: 'A-BQ=C+DQ\\ \\Rightarrow\\ Q_E=\\frac{A-C}{B+D}' },
+    { name: 'Nedostatek při cenovém stropu', tex: 'Q_D-Q_S>0', note: 'Strop je pod rovnovážnou cenou.' },
+    { name: 'Přebytek při cenovém prahu', tex: 'Q_S-Q_D>0', note: 'Práh je nad rovnovážnou cenou.' },
+    { name: 'Náklady státu při výkupu přebytku', tex: '\\text{náklady}=(Q_S-Q_D)\\cdot P_v' },
+    { name: 'Přebytek spotřebitele a výrobce', tex: 'CS=\\int_{P}^{P_{max}}Q_D\\,dp,\\qquad PS=\\int_{P_{min}}^{P}Q_S\\,dp', note: 'U lineárních křivek je to plocha trojúhelníku.' },
+  ] },
+  { topic: 'spotrebitel', items: [
+    { name: 'Mezní užitek', tex: 'MU=\\frac{\\Delta TU}{\\Delta Q}=\\frac{dTU}{dQ}' },
+    { name: 'Rozpočtové omezení', tex: 'P_X\\,X+P_Y\\,Y=I' },
+    { name: 'Směrnice rozpočtové přímky', tex: '-\\frac{P_X}{P_Y}', note: 'Průsečíky s osami: $I/P_X$ a $I/P_Y$.' },
+    { name: 'Mezní míra substituce', tex: 'MRS=-\\frac{\\Delta Y}{\\Delta X}=\\frac{MU_X}{MU_Y}' },
+    { name: 'Optimum spotřebitele', tex: '\\frac{MU_X}{P_X}=\\frac{MU_Y}{P_Y},\\qquad MRS=\\frac{P_X}{P_Y}', note: 'Spolu s rozpočtovým omezením.' },
+    { name: 'Cenová elasticita poptávky', tex: 'E_P=\\frac{\\Delta Q/Q}{\\Delta P/P}', note: 'Středový vzorec: Q a P jsou průměry obou hodnot.' },
+    { name: 'Bodová elasticita', tex: 'E_P=\\frac{dQ}{dP}\\cdot\\frac{P}{Q}' },
+    { name: 'Důchodová elasticita', tex: 'E_I=\\frac{\\Delta Q/Q}{\\Delta I/I}', note: 'Záporná: podřadný statek. Nad 1: luxusní statek.' },
+    { name: 'Křížová elasticita', tex: 'E_{XY}=\\frac{\\Delta Q_X/Q_X}{\\Delta P_Y/P_Y}', note: 'Kladná: substituty. Záporná: komplementy.' },
+    { name: 'Celkový příjem (tržby)', tex: 'TR=P\\cdot Q', note: 'Při elastické poptávce tržby při poklesu ceny rostou.' },
+  ] },
+  { topic: 'nabidka', items: [
+    { name: 'Zisk', tex: '\\pi=TR-TC' },
+    { name: 'Celkové náklady', tex: 'TC=FC+VC' },
+    { name: 'Průměrné náklady', tex: 'AC=\\frac{TC}{Q}=AFC+AVC' },
+    { name: 'Průměrné variabilní a fixní náklady', tex: 'AVC=\\frac{VC}{Q},\\qquad AFC=\\frac{FC}{Q}' },
+    { name: 'Mezní náklad', tex: 'MC=\\frac{\\Delta TC}{\\Delta Q}=\\frac{dTC}{dQ}', note: 'MC protíná AVC a AC v jejich minimech.' },
+    { name: 'Průměrný a mezní produkt', tex: 'AP=\\frac{Q}{L},\\qquad MP=\\frac{\\Delta Q}{\\Delta L}', note: 'MP protíná AP v maximu AP.' },
+    { name: 'Příjmy', tex: 'TR=P\\cdot Q,\\quad AR=\\frac{TR}{Q},\\quad MR=\\frac{\\Delta TR}{\\Delta Q}' },
+    { name: 'Zlaté pravidlo maximalizace zisku', tex: 'MR=MC', note: 'MC protíná MR zdola a P ≥ AVC.' },
+    { name: 'Mezní míra technické substituce', tex: 'MRTS=-\\frac{\\Delta K}{\\Delta L}=\\frac{MP_L}{MP_K}' },
+    { name: 'Izokosta', tex: 'w\\,L+r\\,K=C' },
+    { name: 'Nákladové optimum', tex: '\\frac{MP_L}{w}=\\frac{MP_K}{r}', note: 'Izokvanta se dotýká izokosty.' },
+    { name: 'Cenová elasticita nabídky', tex: 'E_S=\\frac{\\Delta Q_S/Q_S}{\\Delta P/P}' },
+  ] },
+  { topic: 'dokonala-konkurence', items: [
+    { name: 'Příjem dokonale konkurenční firmy', tex: 'P=AR=MR' },
+    { name: 'Optimální výstup', tex: 'P=MC', note: 'Na rostoucí části MC.' },
+    { name: 'Zisk', tex: '\\pi=(P-AC)\\cdot Q' },
+    { name: 'Bod uzavření', tex: 'P=\\min AVC', note: 'Pod ním se firmě vyplatí výrobu zastavit.' },
+    { name: 'Bod vyrovnání', tex: 'P=\\min AC', note: 'Při něm je nulový ekonomický zisk.' },
+    { name: 'Krátkodobá nabídka firmy', tex: '\\text{rostoucí část } MC \\text{ nad } \\min AVC' },
+    { name: 'Dlouhodobá rovnováha odvětví', tex: 'P=LMC=\\min LAC', note: 'Ekonomický zisk je nulový.' },
+    { name: 'Nabídka odvětví', tex: 'Q_S=\\sum_{i=1}^{n}q_i(P)', note: 'Horizontální součet nabídek firem.' },
+  ] },
+  { topic: 'nedokonala-konkurence', items: [
+    { name: 'Lineární poptávka monopolu', tex: 'P=a-bQ' },
+    { name: 'Mezní příjem monopolu', tex: 'MR=a-2bQ', note: 'Dvakrát strmější než poptávka.' },
+    { name: 'Optimum monopolu', tex: 'MR=MC', note: 'Cena se z optimálního množství dosadí do poptávky.' },
+    { name: 'Zisk monopolu', tex: '\\pi=(P-AC)\\cdot Q' },
+    { name: 'Lernerův index monopolní síly', tex: 'L=\\frac{P-MC}{P}=\\frac{1}{|E_P|}' },
+    { name: 'Mrtvá ztráta monopolu', tex: 'DWL=\\tfrac{1}{2}\\,(P_M-MC)(Q_C-Q_M)', note: 'U lineární poptávky a konstantního MC.' },
+    { name: 'Dokonalá konkurence: srovnání', tex: 'P_C=MC,\\quad Q_C>Q_M,\\quad P_C<P_M' },
+    { name: 'Monopolistická konkurence v dlouhém období', tex: 'P=AC,\\quad MR=MC', note: 'Poptávka se dotýká AC, ekonomický zisk je nulový.' },
+  ] },
+];
