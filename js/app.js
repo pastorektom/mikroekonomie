@@ -457,5 +457,10 @@ async function start() {
   await setupAccount();
 }
 
+// Offline režim jen na nasazené stránce (https), ne při vývoji na localhost.
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
 window.addEventListener('hashchange', () => { if (doc.body.dataset.auth !== 'login') render(); });
 start();
