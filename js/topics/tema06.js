@@ -195,7 +195,7 @@ function buildTabulka({ a, b, v, w, F, n = 5 }) {
     task: `Monopol zná cenu P, kterou získá při prodeji Q kusů, a své celkové náklady TC (při nulovém výstupu činí ${cz(F)} Kč, tedy fixní náklady). Vyplňte tabulku: každý řádek je jedno Q od 1 do ${n}, sloupce jsou TR, MR, MC a zisk (v tomto pořadí).`,
     promptTex: header,
     answerSpec: { kind: 'table', value: rows.map((r) => r.map(String)) },
-    conclusion: `Zisk je největší při Q = ${best}: ${czText(rows[best - 1][3])} Kč. V tomto bodě je MR poprvé nižší než MC (a předtím ještě MR byl vyšší).`,
+    conclusion: `Zisk je největší při Q = ${best}: ${czText(rows[best - 1][3])} Kč. Při tomto Q je MR ještě aspoň tak velký jako MC, při dalším kusu už je MR menší než MC, a další kus proto zisk nezvýší.`,
     source: { chapter: 7, number: '7.1 (tabulky)' },
     solution: [
       { title: 'Celkový příjem TR = P · Q', text: 'U každého řádku vynásobíme cenu množstvím.',
@@ -746,7 +746,7 @@ const STATEMENTS = [
   { id: 'k71-j', text: 'Daňová politika je nástrojem regulace monopolu.', truth: true, why: 'Daň z monopolního zisku ho snižuje a přitom neovlivní vyráběné množství.' },
   { id: 'k72-a', text: 'V oligopolním odvětví vyrábějí všechny firmy heterogenní produkt.', truth: false, why: 'Oligopol může mít homogenní i diferencovaný produkt (například ropa je homogenní).' },
   { id: 'k72-b', text: 'Má-li trh podobu oligopolu s dominantní firmou, potom při poklesu ceny dodává dominantní firma na trh větší množství než dříve.', truth: true, why: 'Při nižší ceně dodá konkurenční lem méně, a na dominantní firmu proto zbyde větší díl trhu.' },
-  { id: 'k72-c', text: 'Oligopolisté se snaží chovat jako monopoly.', truth: true, why: 'Kartelovou dohodou se snaží omezit výrobu a zvýšit cenu jako monopol.' },
+  { id: 'k72-c', text: 'Oligopolisté se mohou snažit chovat jako monopoly.', truth: true, why: 'Kartelovou nebo tichou dohodou se mohou snažit omezit výrobu a zvýšit cenu jako monopol. Při nekooperativním chování (vězňovo dilema) se tak nechovají.' },
   { id: 'k72-e', text: 'Pro firmy v oligopolu při maximalizaci zisku neplatí zlaté pravidlo MR = MC.', truth: false, why: 'Zlaté pravidlo platí pro každou firmu, která maximalizuje zisk.' },
   { id: 'k72-f', text: 'Konkurenční lem je skupina firem, která ovlivňuje množství a cenu produkce dominantní firmy.', truth: false, why: 'Je tomu naopak: firmy lemu cenu dominantní firmy přejímají a jen doplňují trh.' },
   { id: 'k72-g', text: 'Při růstu ceny v oligopolu s dominantní firmou podíl dominantní firmy na trhu roste.', truth: false, why: 'Vyšší cena přiláká výrobu malých firem, jejich podíl roste a podíl dominantní firmy klesá.' },

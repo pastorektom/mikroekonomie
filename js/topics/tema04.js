@@ -864,7 +864,7 @@ const ITEMS = [
   { id: 'mc-nepravdive', q: 'Které z následujících výroků o křivce mezních nákladů v krátkém období NEJSOU pravdivé? (Označte všechny nepravdivé.)', multi: true,
     right: ['Mezní náklady nejsou ovlivněny růstem cen vstupů.', 'Mezní náklady částečně závisejí na fixních nákladech.'],
     wrong: ['Mezní náklady se rovnají průměrným nákladům, když jsou průměrné náklady na svém minimu.', 'Když průměrné náklady klesají, křivka mezních nákladů je pod křivkou průměrných nákladů.', 'Mezní náklady jsou větší než průměrné náklady, když je vyráběné množství větší než množství v minimu průměrných nákladů.'],
-    why: 'Dražší vstupy zvyšují náklady, a proto mění i mezní náklady. Fixní náklady se v přírůstku celkových nákladů neobjeví, takže MC na nich nezávisí. Zbylé tři výroky platí.' },
+    why: 'Dražší variabilní vstupy zvyšují náklady, a proto mění i mezní náklady. Fixní náklady se v přírůstku celkových nákladů neobjeví, takže MC na nich nezávisí. Zbylé tři výroky platí.' },
   { id: 'mc-protinani', q: 'Ve kterých bodech protíná křivka mezních nákladů MC ostatní nákladové křivky?', right: ['V minimu křivky AC a v minimu křivky AVC.'],
     wrong: ['V minimu křivky AFC.', 'V maximu křivky TC.', 'Křivku MC žádná jiná křivka neprotíná.'],
     why: 'Mezní náklady stahují průměr dolů, dokud jsou pod ním, a zvedají ho, když jsou nad ním. Průměr proto dosáhne minima přesně tam, kde je MC protne. AFC je stále klesající a minimum nemá.' },
@@ -936,7 +936,7 @@ const STATEMENTS = [
   { id: 'kn-m', text: 'Pokud technologie vykazuje pro všechny vstupy klesající výnosy z variabilního inputu, pak v dlouhém období nemůže nastat případ rostoucích výnosů z rozsahu.', truth: false, why: 'Klesající mezní produkt jednoho vstupu (ostatní pevné) a výnosy z rozsahu (mění se všechny vstupy) jsou dva různé pojmy. Mohou platit současně.' },
   { id: 'kn-n', text: 'Pro tvar a výši nákladů jsou rozhodující vlastnosti produkční funkce a ceny vstupů.', truth: true, why: 'Produkční funkce říká, kolik vstupů je potřeba, a ceny vstupů říkají, kolik stojí.' },
   { id: 'kn-o', text: 'Křivka MC protíná křivku AFC vždy v jejím minimu.', truth: false, why: 'AFC stále klesá a žádné minimum nemá. MC protíná křivky AC a AVC v jejich minimech.' },
-  { id: 'kn-p', text: 'Celkové náklady (TC, VC, FC) a jednotkové (průměrné) náklady (AC, AVC, AFC, MC) nelze kreslit do jednoho grafu, neboť jsou měřeny v jiných jednotkách.', truth: true, why: 'Celkové náklady se měří v Kč, jednotkové v Kč na jednotku výstupu. Zakreslují se proto do samostatných grafů.' },
+  { id: 'kn-p', text: 'Celkové náklady (TC, VC, FC) a jednotkové (průměrné) náklady (AC, AVC, AFC, MC) se obvykle nekreslí do jednoho grafu, neboť jsou měřeny v jiných jednotkách.', truth: true, why: 'Celkové náklady se měří v Kč, jednotkové v Kč na jednotku výstupu. Zakreslují se proto do samostatných grafů.' },
   { id: 'kn-q', text: 'Celkový zisk představuje rozdílovou položku mezi TR a TC.', truth: true, why: 'Zisk je celkový příjem minus celkové náklady.' },
   { id: 'own-1', text: 'Když je MR větší než MC, firma zvýší zisk rozšířením výroby.', truth: true, why: 'Další jednotka přidá k příjmům víc, než přidá k nákladům, a zisk proto roste.' },
   { id: 'own-2', text: 'Fixní náklady v krátkém období rostou spolu s objemem výroby.', truth: false, why: 'Fixní náklady se z definice s objemem výroby nemění.' },
@@ -1025,7 +1025,7 @@ function buildGrafProdukt({ a, b }) {
     conclusion: 'MP protíná AP v maximu AP; dokud je MP nad AP, AP roste, potom klesá.',
     solution: [
       { title: 'Křivka AP', text: 'Průměrný produkt zpočátku roste, dosáhne maxima a potom klesá.', viz: productViz(a, b, ['ap']) },
-      { title: 'Křivka MP', text: 'Mezní produkt klesá a od určitého bodu je menší než AP. Dokud je nad průměrem, průměr roste.', viz: productViz(a, b, ['ap', 'mp']) },
+      { title: 'Křivka MP', text: 'Mezní produkt nejprve roste, dosáhne maxima a pak klesá. Dokud je nad průměrem, průměr roste. AP protíná v jeho maximu a dál je pod ním.', viz: productViz(a, b, ['ap', 'mp']) },
       { title: 'Průsečík', text: 'MP protíná AP v maximu AP. Za průsečíkem je MP pod AP, a průměr proto klesá. MP dosáhne nuly dřív, než by klesl celkový produkt.', viz: ref },
     ],
   });

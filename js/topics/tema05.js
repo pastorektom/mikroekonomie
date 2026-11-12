@@ -480,7 +480,7 @@ function buildObdelnik({ P, q, AC, cost = null }) {
         board: [line('z=AR-AC=P-AC'), line(`z=${cz(P)}-${cz(AC)}=${cz(unit)}`)] },
       { title: 'Celkový zisk', text: `Jednotkový zisk vynásobíme počtem prodaných kusů ${czText(q)}.`,
         board: [line('\\pi=(P-AC)\\cdot q^*'), result(`\\pi=${cz(unit)}\\cdot ${cz(q)}=${cz(total)}\\ \\text{Kč}`)] },
-      { title: 'Zisk v grafu', text: `Celkový zisk je plocha obdélníku. Výška je rozdíl ${czText(unit)} Kč mezi cenou a $AC$, šířka je výstup ${czText(q)} ks, a plocha je tedy ${czText(total)} Kč.${profit ? '' : ' Obdélník leží pod cenou, a jde proto o ztrátu.'}`, viz: graph },
+      { title: 'Zisk v grafu', text: `Celkový zisk je plocha obdélníku. Výška je rozdíl ${czText(unit)} Kč mezi cenou a $AC$, šířka je výstup ${czText(q)} ks, a plocha je tedy ${czText(total)} Kč.${profit ? '' : ' Obdélník leží nad cenou (mezi cenou a $AC$), a jde proto o ztrátu.'}`, viz: graph },
     ],
   });
 }

@@ -75,7 +75,7 @@ function buildMuDerivace({ a, b, q }) {
         board: [line(`TU=${quad(a, b)}`), line(`MU=${cz(a)}-${coef(2 * b, 'Q')}`)] },
       { title: 'Dosadíme množství', text: `Do funkce mezního užitku dosadíme $Q=${q}$.`,
         board: [result(`MU(${q})=${cz(a)}-${cz(2 * b)}\\cdot ${cz(q)}=${cz(mu)}`)] },
-      { title: 'Graf mezního užitku', text: `Mezní užitek s množstvím klesá (zákon klesajícího mezního užitku). Pro ${q}. jednotku má hodnotu ${czText(mu)}.`, viz: graph },
+      { title: 'Graf mezního užitku', text: `Mezní užitek s množstvím klesá (zákon klesajícího mezního užitku). Při spotřebě ${q} jednotek (derivace v bodě ${q}) má hodnotu ${czText(mu)}.`, viz: graph },
     ],
   });
 }
@@ -689,7 +689,7 @@ function buildTrzbyTabulka({ p, q }) {
       { title: 'Výpočet pro každou cenu', text: 'Vynásobíme dvojice cena a množství z jednotlivých sloupců.',
         board: p.map((x, i) => line(`${cz(x)}\\cdot ${cz(q[i])}=${cz(tr[i])}`)) },
       { title: 'Výsledek', text: 'Zapíšeme příjmy v pořadí sloupců.', board: [result(`TR:\\ ${listTex(tr)}`)] },
-      { title: 'Průběh příjmu', text: `Příjem je nejvyšší při ceně ${czText(p[iMax])} Kč (${czText(tr[iMax])} Kč). Příjem roste, dokud je poptávka elastická, a klesá, když je neelastická.`, board: [line(`TR_{max}=${cz(tr[iMax])}\\ \\text{Kč}`)] },
+      { title: 'Průběh příjmu', text: `Příjem je nejvyšší při ceně ${czText(p[iMax])} Kč (${czText(tr[iMax])} Kč). Při snižování ceny příjem roste, dokud je poptávka elastická, a klesá, když je neelastická.`, board: [line(`TR_{max}=${cz(tr[iMax])}\\ \\text{Kč}`)] },
     ],
   });
 }
@@ -952,7 +952,7 @@ const STATEMENTS = [
   { id: 'kn-g', text: 'Snížení všech absolutních cen na polovinu bude mít za následek (za jinak stejných podmínek) zdvojnásobení reálného příjmu.', truth: true, why: 'Za stejný důchod koupí spotřebitel dvakrát víc, reálný důchod se proto zdvojnásobí.' },
   { id: 'kn-h', text: 'Indiferenční křivky jednoho racionálně se chovajícího spotřebitele se mohou protínat.', truth: false, why: 'V průsečíku by spotřební koš měl dvě různé úrovně užitku zároveň, což je rozpor. Křivky se neprotínají.' },
   { id: 'kn-i', text: 'Křivku poptávky lze chápat jako množinu bodů rovnováhy spotřebitele při změnách ceny statku X, neměnném důchodu a cenách ostatních statků.', truth: true, why: 'Každá cena X dává jiné optimum spotřebitele a zde zjištěné množství leží na křivce poptávky.' },
-  { id: 'kn-j', text: 'Konvexnost indiferenčních křivek vyplývá ze zákona substituce, za kterým se skrývá zákon klesajícího mezního užitku.', truth: true, why: 'Klesající MRS (způsobená klesajícím mezním užitkem) dává konvexní tvar křivky.' },
+  { id: 'kn-j', text: 'Konvexnost indiferenčních křivek vyplývá z klesající mezní míry substituce (MRS).', truth: true, why: 'Klesající MRS znamená, že spotřebitel dává přednost vyváženým košům, a to dává křivce konvexní tvar. Je to samostatný předpoklad: v kardinálním pojetí ho lze vysvětlit klesajícím mezním užitkem, ale z něj nutně neplyne.' },
   { id: 'kn-k', text: 'Mezní užitek nikdy nemůže být negativní.', truth: false, why: 'Při přesycení další jednotka celkový užitek snižuje, mezní užitek je pak záporný.' },
   { id: 'kn-l', text: 'Když se pomocí snížení ceny z 50 Kč na 20 Kč nikterak nepodařilo zvýšit prodané množství skript, potom poptávka po skriptech je v daném cenovém intervalu dokonale neelastická.', truth: true, why: 'Množství se vůbec nezměnilo, elasticita je tedy rovna nule.' },
   { id: 'kn-m', text: 'Pokud mají všichni farmáři malou úrodu, jejich celkový příjem může stoupnout. Toto ukazuje, že poptávka po zemědělských produktech je cenově neelastická.', truth: true, why: 'Při neelastické poptávce cena vzroste procentuálně víc, než klesne množství, a příjem proto vzroste.' },
