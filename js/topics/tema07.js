@@ -83,14 +83,15 @@ function landViz({ a, b, T, a2 }, stage = 1) {
 
 // Posun poptávky firmy po faktoru: základní MRP0 = 60 − 10A, cena faktoru 20 (E0: A = 4), vyšší MRP1 = 100 − 10A, nižší 40 − 10A.
 const SHIFT = { '+': { mrp: '100 - 10*x', A: 8, label: 'MRP1' }, '-': { mrp: '40 - 10*x', A: 2, label: 'MRP1' } };
-function shiftFactorViz(dir) {
+function shiftFactorViz(dir, wUp = false) {
   if (dir === '0') {
+    const [x0, w0, x1, w1] = wUp ? [4, 20, 3, 30] : [3, 30, 4, 20];
     return gviz({
       domain: [0, 10], range: [0, 100],
-      curves: [{ expr: '60 - 10*x', label: 'MRP', color: 'blue' }, { expr: '30', label: 'w0', color: 'chalk' }, { expr: '20', label: 'w1', color: 'green', dashed: true }],
-      points: [{ x: 3, y: 30, label: 'E0' }, { x: 4, y: 20, label: 'E1' }],
-      arrows: [{ from: [3, 30], to: [4, 20], label: '' }],
-      alt: 'Pokles ceny faktoru je pohyb po křivce MRP',
+      curves: [{ expr: '60 - 10*x', label: 'MRP', color: 'blue' }, { expr: String(w0), label: 'w0', color: 'chalk' }, { expr: String(w1), label: 'w1', color: 'green', dashed: true }],
+      points: [{ x: x0, y: w0, label: 'E0' }, { x: x1, y: w1, label: 'E1' }],
+      arrows: [{ from: [x0, w0], to: [x1, w1], label: '' }],
+      alt: wUp ? 'Růst ceny faktoru je pohyb po křivce MRP doleva nahoru' : 'Pokles ceny faktoru je pohyb po křivce MRP',
     });
   }
   const s = SHIFT[dir];
@@ -477,9 +478,9 @@ const FSHIFT = [
   { id: 'cena-produktu-down', text: 'Klesla poptávka po finálním produktu, a tím jeho cena na dokonale konkurenčním trhu.', dir: '-', why: 'Poptávka po faktoru je odvozená od poptávky po produktu. Nižší cena produktu snižuje $MRP$ při každém množství faktoru a křivka se posune doleva.' },
   { id: 'technologie', text: 'Nová technologie zvýšila mezní produkt faktoru při každém jeho množství.', dir: '+', why: 'Vyšší $MP$ znamená vyšší $MRP = P \\cdot MP$. Křivka poptávky po faktoru se posune doprava.' },
   { id: 'mzda-down', text: 'Klesla cena faktoru (například mzdová sazba), ostatní podmínky se nezměnily.', dir: '0', why: 'Cena faktoru je na svislé ose. Její změna je pohyb po stejné křivce $MRP$: firma při nižší ceně najme víc jednotek.' },
-  { id: 'min-mzda', text: 'Stát zvýšil minimální mzdu, a tím cenu práce, ostatní podmínky se nezměnily.', dir: '0', why: 'Mzda je cena faktoru práce. Změna ceny faktoru je pohyb po křivce poptávky po faktoru, nikoli její posun.' },
+  { id: 'min-mzda', text: 'Stát zvýšil minimální mzdu, a tím cenu práce, ostatní podmínky se nezměnily.', dir: '0', wUp: true, why: 'Mzda je cena faktoru práce. Změna ceny faktoru je pohyb po křivce poptávky po faktoru, nikoli její posun.' },
   { id: 'lepsi-stroje', text: 'Zaměstnanci dostali lepší vybavení, díky němuž každý z nich vyrobí víc.', dir: '+', why: 'Lepší vybavení zvyšuje mezní produkt práce, a tedy $MRP$. Křivka poptávky po práci se posune doprava.' },
-  { id: 'zakaz', text: 'Úřady omezily prodej finálního produktu, takže jeho cena pro výrobce klesla.', dir: '-', why: 'Vládní zásah na trhu produktu mění jeho cenu, tedy $MRP$ při každém množství faktoru, a poptávka po faktoru se posune doleva.' },
+  { id: 'zakaz', text: 'Zákaz spotřeby výrobku snížil poptávku po něm a tím jeho cenu.', dir: '-', why: 'Nižší poptávka po produktu snižuje jeho cenu, tedy $MRP$ při každém množství faktoru, a poptávka po faktoru se posune doleva.' },
   { id: 'poptavka-up', text: 'Vzrostla poptávka po finálním produktu a jeho cena na dokonale konkurenčním trhu stoupla.', dir: '+', why: 'Poptávka po faktoru je odvozená od poptávky po produktu. Vyšší cena produktu zvedá $MRP$ a posune křivku doprava.' },
 ];
 const fshiftById = (id) => FSHIFT.find((e) => e.id === id) ?? FSHIFT[0];
@@ -496,8 +497,8 @@ function fshiftSteps(ev) {
       board: [line(ans === '0' ? '\\text{mění se cena faktoru}\\ w' : '\\text{mění se}\\ MRP=MP\\cdot MR')] },
     { title: 'Dopad na MRP', text: ev.why,
       board: [line(ans === '0' ? '\\Delta w\\ \\Rightarrow\\ \\text{pohyb po MRP}' : ans === '+' ? 'MRP_0\\ \\to\\ MRP_1\\quad(\\rightarrow)' : 'MRP_0\\ \\to\\ MRP_1\\quad(\\leftarrow)')] },
-    { title: 'Graf', text: ans === '0' ? 'Cena faktoru se změní z $w_0$ na $w_1$ a firma se přesune z E0 do E1 po téže křivce $MRP$.' : `Původní křivka je nakreslená plně, nová čárkovaně. Při stejné ceně faktoru najme firma v bodě E1 ${ans === '+' ? 'víc' : 'méně'} jednotek než v bodě E0.`,
-      viz: shiftFactorViz(ans) },
+    { title: 'Graf', text: ans === '0' ? `Cena faktoru se změní z $w_0$ na $w_1$ a firma se přesune z E0 do E1 po téže křivce $MRP$ ${ev.wUp ? 'doleva nahoru, takže najme méně jednotek.' : 'doprava dolů, takže najme víc jednotek.'}` : `Původní křivka je nakreslená plně, nová čárkovaně. Při stejné ceně faktoru najme firma v bodě E1 ${ans === '+' ? 'víc' : 'méně'} jednotek než v bodě E0.`,
+      viz: shiftFactorViz(ans, ev.wUp) },
     { title: 'Závěr', text: `Správně: ${fshiftWord(ans)[0].toLowerCase()}${fshiftWord(ans).slice(1)}`,
       board: [result(ans === '0' ? '\\text{pohyb po křivce}' : ans === '+' ? 'MRP\\ \\rightarrow' : 'MRP\\ \\leftarrow')] },
   ];
@@ -679,8 +680,8 @@ const STATEMENTS = [
   { id: 'kn-g', text: 'S růstem množství vstupů se produkční funkce zplošťuje.', truth: true, why: 'Platí zákon klesajících mezních výnosů: v oblasti, kde firma faktor najímá, mezní produkt klesá, takže produkce roste stále pomaleji.' },
   { id: 'kn-h', text: 'Hodnotu mezního produktu vstupu získáme jeho vynásobením cenou výrobního faktoru.', truth: false, why: 'Hodnota mezního produktu je $VMP = MP \\cdot P$, tedy mezní produkt krát cena PRODUKTU. Cena faktoru je s ním naopak porovnávána při rozhodování o najímání. (Kniha zde chybně uvádí pravdu.)' },
   { id: 'kn-i', text: 'Nabídková křivka vstupu pro firmu v dokonalé konkurenci je dokonale elastická.', truth: true, why: 'Firma je příjemcem ceny faktoru a koupí libovolné množství za tržní cenu. Křivka je vodorovná.' },
-  { id: 'kn-j', text: 'V nedokonalé konkurenci změna najímaného množství výrobního faktoru povede ke změně jeho ceny.', truth: true, why: 'Firma s tržní silou na trhu faktoru čelí rostoucí nabídce, takže zvýšení najímaného množství zvedne cenu.' },
-  { id: 'own-1', text: 'Rovnost MRP = MFC je dostatečná podmínka maxima zisku, i kdyby MRP v daném bodě rostlo.', truth: false, why: 'Rovnost je jen nutná podmínka. Je-li $MRP$ v bodě rostoucí (rostoucí $MP$), jde o minimum zisku. Maximum je tam, kde $MRP$ protíná $MFC$ shora.' },
+  { id: 'kn-j', text: 'V nedokonalé konkurenci na trhu faktoru změna najímaného množství výrobního faktoru povede ke změně jeho ceny.', truth: true, why: 'Firma s tržní silou na trhu faktoru čelí rostoucí nabídce, takže zvýšení najímaného množství zvedne cenu. Na trhu faktoru s dokonalou konkurencí se cena nemění.' },
+  { id: 'own-1', text: 'Rovnost MRP = MFC je dostatečná podmínka maxima zisku, i kdyby MRP v daném bodě rostlo.', truth: false, why: 'Rovnost je jen nutná podmínka. Maximum je tam, kde $MRP$ protíná $MFC$ shora (křivka $MRP$ je v bodě strmější než $MFC$). Při $MFC = w$ to znamená klesající $MRP$. Je-li $MRP$ v bodě rostoucí, jde o minimum zisku.' },
   { id: 'own-2', text: 'Křivka MFC firmy, která je příjemcem ceny faktoru, je vodorovná v úrovni tržní ceny.', truth: true, why: 'Každá další jednotka stojí stejně: $MFC = w$.' },
   { id: 'own-3', text: 'Monopsonista platí za faktor cenu rovnou svým mezním nákladům na faktor.', truth: false, why: 'Platí cenu z křivky nabídky při zvoleném množství. Mezní náklady jsou vyšší a rozhodují jen o tom, kolik jednotek se najme.' },
   { id: 'own-4', text: 'Za jinak stejných podmínek monopsonista najme méně faktoru a zaplatí nižší cenu než firma na dokonale konkurenčním trhu faktoru.', truth: true, why: '$MFC$ leží nad nabídkou, takže průsečík s $MRP$ je při menším množství a nižší ceně z nabídky.' },
@@ -715,7 +716,7 @@ function buildAnoNe({ id }) {
 // typ: definice pojmů (zkouška)
 // =====================================================================================
 const DEFS = [
-  { id: 'cena-faktoru', q: 'Jak se nazývá cena práce, půdy a kapitálu?', right: 'Mzda, renta a úrok.', wrong: ['Úrok, mzda a zisk.', 'Renta, daň a mzda.', 'Zisk, renta a úrok.'] },
+  { id: 'cena-faktoru', q: 'Jak se nazývá cena práce, půdy a kapitálu?', right: 'Mzda, renta a u reálného kapitálu nájemné (úrok je cena finančního kapitálu).', wrong: ['Úrok, mzda a zisk.', 'Renta, daň a mzda.', 'Zisk, renta a daň.'] },
   { id: 'odvozena', q: 'Co znamená, že poptávka po výrobním faktoru je odvozená?', right: 'Vzniká z poptávky po finálním produktu, k jehož výrobě se faktor používá.', wrong: ['Závisí jen na ceně samotného faktoru.', 'Vzniká z důchodu domácností, které faktor vlastní.', 'Stanovuje ji stát podle potřeb firem.'] },
   { id: 'mp', q: 'Co je mezní produkt faktoru?', right: 'Přírůstek produkce z další jednotky faktoru při neměnném množství ostatních faktorů.', wrong: ['Produkce dělená množstvím použitého faktoru.', 'Přírůstek nákladů z další jednotky faktoru.', 'Celková produkce všech faktorů.'] },
   { id: 'mrp', q: 'Co je příjem z mezního produktu (MRP)?', right: 'Dodatečný příjem z prodeje produkce vyrobené další jednotkou faktoru (MRP = MP krát MR).', wrong: ['Dodatečné náklady na další jednotku faktoru.', 'Cena faktoru na trhu faktorů.', 'Příjem z prodeje celé produkce firmy.'] },
@@ -802,7 +803,7 @@ function buildGrafPosunFaktor({ id }) {
     points: 2,
     data: { id, event: ev },
     task: `Nakreslete do grafu s osami A a Kč křivku poptávky firmy po faktoru (MRP) a cenu faktoru a zakreslete, co se stane při změně: ${ev.text} Vyznačte původní a novou rovnováhu firmy.`,
-    answerSpec: { kind: 'whiteboard', reference: shiftFactorViz(ev.dir) },
+    answerSpec: { kind: 'whiteboard', reference: shiftFactorViz(ev.dir, ev.wUp) },
     conclusion: ev.dir === '0' ? 'Jde o pohyb po křivce MRP, křivka se neposune.' : `Křivka MRP se posune ${ev.dir === '+' ? 'doprava' : 'doleva'}.`,
     source: { chapter: 8, number: 'D-3' },
     solution: fshiftSteps(ev),
@@ -865,7 +866,7 @@ const view = (curves, extra = {}) => ({ kind: 'econ', data: { axes: { x: 'A', y:
 
 const theory = [
   { heading: 'Trh výrobního faktoru a odvozená poptávka', term: 'Odvozená poptávka',
-    text: 'Výrobní faktory jsou vstupy do výroby: půda, práce a kapitál. Jejich cenou je renta (půda), mzda (práce) a úrok (kapitál). I na trzích faktorů platí poptávka a nabídka, ale strany jsou prohozené proti trhu zboží: faktory poptávají firmy, nabízejí je domácnosti jako jejich vlastníci.\n\nPoptávka firmy po faktoru je odvozená. Firma nechce faktor kvůli němu samému, ale kvůli produkci, kterou z něj vyrobí. Poptávka po práci v automobilce proto závisí na tom, kolik aut se dá prodat a za jakou cenu. Rovnovážná cena faktoru vzniká jako na trhu zboží: ve střetu tržní poptávky (součet poptávek firem) a tržní nabídky.',
+    text: 'Výrobní faktory jsou vstupy do výroby: půda, práce a kapitál. Jejich cenou je renta (půda), mzda (práce) a u reálného kapitálu (kapitálových služeb) nájemné, zatímco úrok je cena finančního kapitálu (půjčených peněz). I na trzích faktorů platí poptávka a nabídka, ale strany jsou prohozené proti trhu zboží: faktory poptávají firmy, nabízejí je domácnosti jako jejich vlastníci.\n\nPoptávka firmy po faktoru je odvozená. Firma nechce faktor kvůli němu samému, ale kvůli produkci, kterou z něj vyrobí. Poptávka po práci v automobilce proto závisí na tom, kolik aut se dá prodat a za jakou cenu. Rovnovážná cena faktoru vzniká jako na trhu zboží: ve střetu tržní poptávky (součet poptávek firem upravený o pokles ceny produktu při rozšíření výroby všech firem) a tržní nabídky.',
     viz: view([{ expr: '90 - 10*x', label: 'D', color: 'blue' }, { expr: '30 + 5*x', label: 'S', color: 'chalk' }], { points: [{ x: 4, y: 50, label: 'E', guides: true }] }),
     mistakes: ['Poptávka po faktoru není odvozená od ceny samotného faktoru, ale od poptávky po produktu a od produktivity faktoru. Cena faktoru jen určuje, v kterém bodě křivky poptávky se firma nachází.', 'Na trhu faktorů jsou firmy na straně poptávky a domácnosti na straně nabídky. Na trhu zboží je to opačně.'] },
   { heading: 'Mezní produkt a klesající výnosy', term: 'Mezní produkt (MP)',
@@ -889,7 +890,7 @@ const theory = [
     viz: view([{ expr: '100 - 10*x', label: 'MRP', color: 'blue' }, { expr: '60', label: 'MFC = w', color: 'chalk' }], { points: [{ x: 4, y: 60, label: 'E', guides: true }], areas: [{ between: ['100 - 10*x', '60'], from: 0, to: 4, label: 'přínos', color: 'green' }] }),
     mistakes: ['MRP = MFC je jen nutná podmínka. Při rostoucím mezním produktu může rovnost odpovídat minimu zisku. Optimum je tam, kde MRP protíná MFC shora.', 'Podmínka určuje, kolik faktoru najmout, pokud se výroba vůbec vyplatí. Při příliš nízké ceně produktu firma nevyrábí a faktor nepoptává.'] },
   { heading: 'Poptávka firmy po faktoru a její posuny', term: 'Poptávka firmy po faktoru',
-    text: 'Při jednom proměnném faktoru (ostatní jsou pevné, tedy v krátkém období) je křivka MRP zároveň křivkou poptávky firmy po faktoru: při každé ceně w firma najme množství, kde MRP = w. Použitelná je jen klesající část křivky s kladným mezním produktem.\n\nZměna ceny faktoru je pohyb po křivce. Křivku posouvají jiné činitele:\n\n• změna ceny produktu (tedy poptávky po produktu): mění MRP = P krát MP,\n• změna produktivity faktoru (technologie, lepší vybavení): mění MP,\n• změna množství nebo ceny jiných faktorů, které s ním spolupracují (víc strojů zvýší MP práce).\n\nV dlouhém období se přizpůsobují všechny faktory, takže při změně ceny jednoho faktoru se mění i množství ostatních a posouvá se i jeho MRP. Poptávka po faktoru je pak elastičtější než v krátkém období a křivka MRP jednoho faktoru už neukazuje celou poptávku.',
+    text: 'Při jednom proměnném faktoru (ostatní jsou pevné, tedy v krátkém období) je křivka MRP zároveň křivkou poptávky firmy po faktoru: při každé ceně w firma najme množství, kde MRP = w. Použitelná je jen klesající část křivky s kladným mezním produktem, na které navíc platí $MRP \\le ARP$, kde $ARP = P \\cdot AP$ je příjem z průměrného produktu (jinak by příjem nepokryl náklady na faktor).\n\nZměna ceny faktoru je pohyb po křivce. Křivku posouvají jiné činitele:\n\n• změna ceny produktu (tedy poptávky po produktu): mění MRP = P krát MP,\n• změna produktivity faktoru (technologie, lepší vybavení): mění MP,\n• změna množství nebo ceny jiných faktorů, které s ním spolupracují (víc strojů zvýší MP práce).\n\nV dlouhém období se přizpůsobují všechny faktory, takže při změně ceny jednoho faktoru se mění i množství ostatních a posouvá se i jeho MRP. Poptávka po faktoru je pak elastičtější než v krátkém období a křivka MRP jednoho faktoru už neukazuje celou poptávku.',
     viz: view([{ expr: '60 - 10*x', label: 'MRP0', color: 'blue' }, { expr: '100 - 10*x', label: 'MRP1', color: 'accent', dashed: true }, { expr: '20', label: 'w', color: 'chalk' }], { points: [{ x: 4, y: 20, label: 'E0' }, { x: 8, y: 20, label: 'E1' }] }),
     mistakes: ['Změna ceny samotného faktoru křivku poptávky neposune, je to pohyb po ní.', 'Poptávkou po faktoru je jen klesající část MRP s kladným mezním produktem. Část křivky pod osou (záporné MP) žádnou poptávku neznamená.'] },
   { heading: 'Kombinace více faktorů', term: 'Optimální kombinace faktorů',
@@ -897,7 +898,7 @@ const theory = [
     tex: 'MR=\\frac{P_K}{MP_K}=\\frac{P_L}{MP_L}=\\frac{P_A}{MP_A}\\ \\Leftrightarrow\\ \\frac{MP_K}{P_K}=\\frac{MP_L}{P_L}=\\frac{MP_A}{P_A}=\\frac{1}{MR}',
     mistakes: ['Neporovnáváme mezní produkty faktorů mezi sebou, ale jejich poměry k ceně. Faktor s největším MP nemusí být nejvýhodnější, může být drahý.', 'Pravidlo v této podobě platí při dokonalé konkurenci na trzích faktorů. Má-li firma tržní sílu na trhu faktoru, dosadí se místo ceny MFC.'] },
   { heading: 'Rovnováha na trhu faktoru a monopsonie', term: 'Monopsonie',
-    text: 'Na trhu faktoru vzniká cena střetem tržní poptávky (součet křivek MRP firem) a tržní nabídky. Jednotlivá malá firma tržní cenu přijímá jako danou, tedy MFC = w.\n\nMonopsonie je trh s jediným kupcem faktoru (například jediný velký zaměstnavatel v malém městě). Firma čelí celé rostoucí nabídce, a proto je MFC větší než cena. Postup je dvoukrokový: množství najdeme z MRP = MFC, cenu ale odečteme z křivky nabídky při tomto množství. Monopsonista tak najímá méně faktoru a platí nižší cenu než firma na dokonale konkurenčním trhu faktoru, kde se MRP rovná nabídce. Při lineární nabídce w = c + dA je MFC = c + 2dA.',
+    text: 'Na trhu faktoru vzniká cena střetem tržní poptávky (součet poptávek firem upravený o pokles ceny produktu při rozšíření výroby všech firem) a tržní nabídky. Jednotlivá malá firma tržní cenu přijímá jako danou, tedy MFC = w.\n\nMonopsonie je trh s jediným kupcem faktoru (například jediný velký zaměstnavatel v malém městě). Firma čelí celé rostoucí nabídce, a proto je MFC větší než cena. Postup je dvoukrokový: množství najdeme z MRP = MFC, cenu ale odečteme z křivky nabídky při tomto množství. Monopsonista tak najímá méně faktoru a platí nižší cenu než firma na dokonale konkurenčním trhu faktoru, kde se MRP rovná nabídce. Při lineární nabídce w = c + dA je MFC = c + 2dA.',
     viz: view([{ expr: '100 - 10*x', label: 'MRP', color: 'blue' }, { expr: '10 + 10*x', label: 'S', color: 'chalk' }, { expr: '10 + 20*x', label: 'MFC', color: 'accent' }], { points: [{ x: 3, y: 70, label: 'M', guides: true }, { x: 3, y: 40, label: 'W', guides: true }, { x: 4.5, y: 55, label: 'C', guides: true }] }),
     mistakes: ['Cenu monopsonisty nečteme z MFC, ale z nabídky. MFC rozhoduje jen o tom, kolik jednotek se najme.', 'Monopsonie je jediný kupující, monopol jediný prodávající. Snadno se zaměňují.'] },
   { heading: 'Trh půdy a ekonomická renta', term: 'Ekonomická renta',
