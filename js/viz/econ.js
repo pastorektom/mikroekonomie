@@ -89,6 +89,15 @@ function render(svg, data, v) {
 
   const clipped = el(doc, svg, 'g', { 'clip-path': `url(#${clipId})` });
 
+  // Popisky se nesmějí překrývat: když je v okolí už jiný, posune se pod něj.
+  const placed = [];
+  const spread = (x, y) => {
+    let yy = y;
+    for (let i = 0; i < 8 && placed.some((p) => Math.abs(p.x - x) < 34 && Math.abs(p.y - yy) < 14); i++) yy += 14;
+    placed.push({ x, y: yy });
+    return yy;
+  };
+
   // plochy mezi křivkami (pod křivkami, aby je čáry nepřekrývaly)
   for (const a of Array.isArray(data.areas) ? data.areas : []) {
     if (!a || !Array.isArray(a.between) || a.between.length !== 2 || !isNum(a.from) || !isNum(a.to) || a.from === a.to) continue;
@@ -124,7 +133,7 @@ function render(svg, data, v) {
       let [lx, ly] = last[last.length - 1];
       let cx = sx(lx); let cy = sy(ly);
       cx = Math.min(M.l + pw - 4, cx); cy = Math.max(M.t + 14, Math.min(M.t + ph - 6, cy));
-      el(doc, svg, 'text', { class: `viz-label viz-label-${col}`, x: cx - 6, y: cy - 11, 'text-anchor': 'end' }, c.label);
+      el(doc, svg, 'text', { class: `viz-label viz-label-${col}`, x: cx - 6, y: spread(cx - 6, cy - 11), 'text-anchor': 'end' }, c.label);
     }
   }
   if (drawn === 0) return false;
@@ -138,7 +147,7 @@ function render(svg, data, v) {
     }
     el(doc, svg, 'circle', { class: `viz-point viz-c-${color(p.color, 'accent')}`, cx: sx(p.x), cy: sy(p.y), r: 4.5 });
     if (typeof p.label === 'string' && p.label) {
-      el(doc, svg, 'text', { class: 'viz-label viz-label-accent', x: sx(p.x) + 8, y: sy(p.y) - 8, 'text-anchor': 'start' }, p.label);
+      el(doc, svg, 'text', { class: 'viz-label viz-label-accent', x: sx(p.x) + 8, y: spread(sx(p.x) + 8, sy(p.y) - 8), 'text-anchor': 'start' }, p.label);
     }
   }
 

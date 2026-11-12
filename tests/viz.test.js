@@ -91,3 +91,12 @@ test('SVG má české alt, výchozí „Ekonomický graf“, a vlastní alt se p
   const b = svgEl().svg; drawEcon(b, { ...market, alt: 'Posun poptávky doprava' });
   assert.equal(b.getAttribute('aria-label'), 'Posun poptávky doprava');
 });
+
+test('popisky křivek, které končí na stejném místě, se nepřekrývají (různé y)', () => {
+  const { svg } = svgEl();
+  drawEcon(svg, { domain: [0, 10], range: [0, 10], curves: [{ expr: 'x', label: 'S0' }, { expr: 'x', label: 'S1' }, { expr: 'x', label: 'S2' }] });
+  const ys = [...svg.querySelectorAll('text.viz-label')].filter((t) => /^S\d$/.test(t.textContent)).map((t) => Number(t.getAttribute('y')));
+  assert.equal(ys.length, 3);
+  assert.equal(new Set(ys).size, 3);
+  for (let i = 1; i < ys.length; i++) assert.ok(Math.abs(ys[i] - ys[i - 1]) >= 12 || Math.abs(ys[i] - ys[0]) >= 12);
+});

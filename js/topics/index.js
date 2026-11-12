@@ -1,11 +1,13 @@
 // Seznam témat v pořadí jako v Moodlu. Každé téma je modul js/topics/temaNN.js
 // s výchozím exportem { id, title, order, theory, types } (vzorem bude js/topics/tema02.js).
 // Dokud téma není hotové, má prázdný výklad i typy a aplikace ukáže „připravuje se“.
+import tema02 from './tema02.js';
+
 const stub = (order, id, title) => ({ id, title, order, theory: [], types: [] });
 
 export const topics = [
   stub(1, 'uvod', 'Úvod do ekonomického studia'),
-  stub(2, 'trh', 'Trh a tržní mechanismus'),
+  tema02,
   stub(3, 'spotrebitel', 'Chování spotřebitele a formování poptávky'),
   stub(4, 'nabidka', 'Nabídka na trhu výrobků a služeb'),
   stub(5, 'dokonala-konkurence', 'Firma v podmínkách dokonalé konkurence'),
