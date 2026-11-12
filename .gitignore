@@ -1,0 +1,6 @@
+Moodle_Mikroekonomie/
+node_modules/
+.env
+content/
+.superpowers/
+.playwright-mcp/
