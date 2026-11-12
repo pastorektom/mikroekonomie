@@ -459,3 +459,10 @@ body[data-auth="login"] .shell { display: block; }
   .extra-nav a { padding: 8px 14px; border-radius: 8px; text-decoration: none; color: inherit; }
   .extra-nav a[aria-current="page"] { background: var(--blue-soft); }
 }
+
+/* Výběr z možností (choice, multichoice, truefalse) */
+.option-list { display: grid; gap: 8px; }
+.option { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; min-height: 44px; border: 1px solid var(--line, #cbd5e1); border-radius: 10px; cursor: pointer; }
+.option input { margin-top: 3px; width: 20px; height: 20px; flex: none; }
+.option:has(input:checked) { border-color: var(--blue); background: var(--blue-soft); }
+.reveal-viz { margin-top: 12px; }

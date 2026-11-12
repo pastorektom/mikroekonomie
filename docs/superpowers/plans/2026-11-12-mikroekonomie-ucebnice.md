@@ -61,7 +61,7 @@ mikroekonomie/
 // js/topics/temaNN.js  default export (stejný tvar jako v Matice):
 { id: 'trh', title: 'Trh a tržní mechanismus', order: 2,
   theory: [{ heading, text, tex?, term?, mistakes?: string[] }],   // term = definice pro zkouškové otázky
-  types: [{ id, title, generate(rng): data, solve(data): Problem }] }
+  types: [{ id, title, generate(rng): Problem, solve(data): Problem }] }   // generate vrací celý příklad (jako v Matice); solve(data) sestaví příklad z uložených dat (pevné příklady ze cvičebnice)
 
 // Problem
 { id, topic, type, data, task, promptTex?, hint?,

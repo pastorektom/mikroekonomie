@@ -1,6 +1,6 @@
 // Vstup aplikace: router, postranní seznam témat, obrazovky. Přihlášení (úkol 3), procvičování (úkol 4)
 // a zkouškový režim (úkol 9) se doplní do těchto bodů: viewPractice, viewExam, enterApp.
-import { setTexEngine, h } from './render.js';
+import { setTexEngine, renderTex, renderText, h } from './render.js';
 import { parseRoute, routeHref, examHref, FORMULAS_HREF, TABS } from './router.js';
 import { renderTheory } from './ui/theory.js';
 import { mountStepper } from './ui/stepper.js';
@@ -10,7 +10,8 @@ import { makeRng, randomSeed } from './rng.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { initAuth, currentUser, signOut, onAuthEvent } from './auth.js';
 import { initProgress, setProgressUser, flushQueue } from './progress.js';
-import { initContent } from './content.js';
+import { initContent, loadFixedProblems } from './content.js';
+import { mountPractice, buildFixedProblem, FIXED_TYPE, FIXED_TITLE } from './ui/practice.js';
 import { renderLogin, renderNewPassword } from './ui/login.js';
 
 const doc = document;
@@ -111,38 +112,81 @@ function viewPlaceholder(main, title, text) {
 
 let activeStepper = null; // krokovač v Postupu; při novém příkladu nebo odchodu se uvolní
 
-// Postup krok za krokem: vylosuje příklad zvoleného typu a ukáže jeho řešení na tabuli.
-function viewPostup(body, topic) {
+// Postup krok za krokem: příklad zvoleného typu (type.generate(rng) vrací celý příklad),
+// nebo pevný příklad z cvičebnice (FIXED_TYPE, seed = pořadí v seznamu). Řešení se ukáže na tabuli.
+function viewPostup(body, topic, query = {}) {
   const types = Array.isArray(topic.types) ? topic.types : [];
   if (types.length === 0) { body.appendChild(soon('Řešené postupy k tomuto tématu se připravují.')); return; }
-  let type = types[0];
+  let type = types.find((t) => t.id === query.type) || types[0];
+  let fixedMode = query.type === FIXED_TYPE;
+  let fixed = [];
+  let fixedIndex = fixedMode && Number.isInteger(query.seed) ? query.seed : 0;
+  let fixedSeed = !fixedMode && Number.isInteger(query.seed) ? query.seed : null; // příklad z procvičování (jen poprvé)
   const picker = h(doc, 'div', { class: 'type-picker', role: 'group', 'aria-label': 'Typ příkladu' });
   const prompt = h(doc, 'div', { class: 'prompt' });
   const stepperEl = h(doc, 'div');
   const again = h(doc, 'button', { type: 'button', class: 'btn btn-quiet', text: 'Jiný příklad' });
+
+  function mark() {
+    [...picker.children].forEach((b) => b.setAttribute('aria-pressed',
+      String(fixedMode ? b.dataset.type === FIXED_TYPE : b.dataset.type === type.id)));
+  }
+
   function show() {
     let problem;
-    try { problem = type.solve(type.generate(makeRng(randomSeed()))); } catch {
+    let label;
+    try {
+      if (fixedMode) {
+        if (!fixed.length) { prompt.textContent = 'Načítám příklady ze cvičebnice…'; stepperEl.textContent = ''; mark(); return; }
+        problem = buildFixedProblem(topic, fixed, fixedIndex);
+        label = `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${problem.source ? ` · ${problem.source}` : ''}`;
+      } else {
+        const seed = fixedSeed ?? randomSeed();
+        fixedSeed = null;
+        problem = type.generate(makeRng(seed));
+        label = type.title;
+      }
+    } catch {
       prompt.textContent = 'Příklad se nepodařilo vytvořit. Zkuste „Jiný příklad“.';
       stepperEl.textContent = '';
       return;
     }
     prompt.textContent = '';
-    prompt.appendChild(h(doc, 'p', { class: 'prompt-label', text: type.title }));
-    if (problem.task) prompt.appendChild(h(doc, 'div', { class: 'prompt-task', text: problem.task }));
+    prompt.appendChild(h(doc, 'p', { class: 'prompt-label', text: label }));
+    if (problem.task) prompt.appendChild(renderText(h(doc, 'div', { class: 'prompt-task prose' }), problem.task));
+    if (problem.promptTex) {
+      const f = h(doc, 'div', { class: 'formula' });
+      renderTex(f, problem.promptTex, { display: true });
+      prompt.appendChild(f);
+    }
     activeStepper?.destroy();
     activeStepper = mountStepper(stepperEl, problem.solution, { renderStepVisual: stepVisual, disposeStepVisual });
-    [...picker.children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.type === type.id)));
+    mark();
   }
   for (const t of types) {
     picker.appendChild(h(doc, 'button', {
       type: 'button', class: 'chip', 'data-type': t.id, text: t.title,
-      onclick: () => { type = t; show(); },
+      onclick: () => { type = t; fixedMode = false; show(); },
     }));
   }
-  again.addEventListener('click', show);
+  again.addEventListener('click', () => {
+    if (fixedMode && fixed.length) fixedIndex = (fixedIndex + 1) % fixed.length;
+    show();
+  });
   body.append(...[types.length > 1 ? picker : null, prompt, stepperEl, h(doc, 'div', { class: 'actions' }, again)].filter(Boolean));
   show();
+  // Pevné příklady ze cvičebnice (jen když nějaké jsou) přibudou jako další volba.
+  loadFixedProblems(topic.id).then((list) => {
+    if (!body.isConnected) return;
+    fixed = list;
+    if (!list.length) { if (fixedMode) { fixedMode = false; show(); } return; }
+    picker.appendChild(h(doc, 'button', {
+      type: 'button', class: 'chip', 'data-type': FIXED_TYPE, text: FIXED_TITLE,
+      onclick: () => { fixedMode = true; fixedIndex = 0; show(); },
+    }));
+    if (!picker.isConnected) body.insertBefore(picker, prompt);
+    if (fixedMode) show(); else mark();
+  });
 }
 
 function viewTopic(main, route) {
@@ -154,8 +198,11 @@ function viewTopic(main, route) {
   const body = h(doc, 'div', { class: 'tab-body' });
   main.appendChild(body);
   if (route.tab === 'vyklad') renderTheory(body, topic);
-  else if (route.tab === 'postup') viewPostup(body, topic);
-  else body.appendChild(soon('Procvičování se připravuje.')); // úkol 4: mountPractice
+  else if (route.tab === 'postup') viewPostup(body, topic, route.query);
+  else {
+    const practice = mountPractice(body, topic);
+    loadFixedProblems(topic.id).then((list) => { if (body.isConnected) practice.setFixed(list); });
+  }
 }
 
 function render() {
