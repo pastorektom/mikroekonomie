@@ -7,6 +7,11 @@ import { mountStepper } from './ui/stepper.js';
 import { stepVisual, disposeStepVisual } from './viz/step.js';
 import { topics as courseTopics, sortTopics } from './topics/index.js';
 import { makeRng, randomSeed } from './rng.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+import { initAuth, currentUser, signOut, onAuthEvent } from './auth.js';
+import { initProgress, setProgressUser, flushQueue } from './progress.js';
+import { initContent } from './content.js';
+import { renderLogin, renderNewPassword } from './ui/login.js';
 
 const doc = document;
 const $ = (sel) => doc.querySelector(sel);
@@ -176,6 +181,76 @@ function render() {
   window.scrollTo(0, 0);
 }
 
+let isGuest = true; // host: pokrok se neukládá
+
+function renderAccount(user) {
+  const box = $('#account');
+  box.textContent = '';
+  if (!user) return;
+  box.append(
+    h(doc, 'span', { class: 'account-mail', text: user.email }),
+    h(doc, 'button', {
+      type: 'button', class: 'link-btn', text: 'Odhlásit se',
+      onclick: async () => { await signOut(); location.reload(); },
+    }),
+  );
+}
+
+function enterApp(user) {
+  isGuest = !user;
+  setProgressUser(user?.id ?? null); // host (null): nic se neukládá ani nefrontuje
+  delete doc.body.dataset.auth;
+  renderAccount(user);
+  render();
+}
+
+function showNewPassword() {
+  doc.body.dataset.auth = 'login';
+  doc.title = `Nové heslo – ${APP_NAME}`;
+  const main = $('#main');
+  renderNewPassword(main, {
+    onDone: async () => { location.hash = '#/'; await flushQueue(); enterApp(await currentUser()); },
+  });
+  main.focus({ preventScroll: true });
+}
+
+function showLogin(configured) {
+  doc.body.dataset.auth = 'login';
+  doc.title = `Přihlášení – ${APP_NAME}`;
+  const main = $('#main');
+  renderLogin(main, {
+    configured,
+    onLogin: async () => { const u = await currentUser(); setProgressUser(u?.id); await flushQueue(); enterApp(u); },
+    onGuest: () => enterApp(null),
+  });
+  main.focus({ preventScroll: true });
+}
+
+// Bez vyplněného js/config.js se klient nevytváří a aplikace nabídne režim bez přihlášení.
+async function setupAccount() {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    initProgress(null);
+    return showLogin(false);
+  }
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    initAuth(client);
+    initProgress(client);
+    initContent(client);
+    window.addEventListener('online', flushQueue);
+    let recovering = false;
+    onAuthEvent((event) => { if (event === 'PASSWORD_RECOVERY') { recovering = true; showNewPassword(); } });
+    const user = await currentUser();
+    if (recovering) return;
+    if (user) { setProgressUser(user.id); flushQueue(); return enterApp(user); }
+    showLogin(true);
+  } catch {
+    initProgress(null);
+    showLogin(false);
+  }
+}
+
 async function start() {
   try {
     const katex = await import('katex');
@@ -183,8 +258,8 @@ async function start() {
   } catch {
     setTexEngine(null); // bez KaTeXu se vzorce ukážou jako text
   }
-  render();
+  await setupAccount();
 }
 
-window.addEventListener('hashchange', render);
+window.addEventListener('hashchange', () => { if (doc.body.dataset.auth !== 'login') render(); });
 start();
