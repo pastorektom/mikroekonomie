@@ -17,6 +17,8 @@ import { initProgress, setProgressUser, flushQueue } from './progress.js';
 import { initContent, loadFixedProblems } from './content.js';
 import { mountPractice, buildFixedProblem, FIXED_TYPE, FIXED_TITLE } from './ui/practice.js';
 import { renderLogin, renderNewPassword } from './ui/login.js';
+import { mountExam } from './ui/exam.js';
+import { EXAMS } from './exam.js';
 
 const doc = document;
 const $ = (sel) => doc.querySelector(sel);
@@ -210,6 +212,14 @@ function viewPlaceholder(main, title, text) {
 }
 
 let activeStepper = null; // krokovač v Postupu; při novém příkladu nebo odchodu se uvolní
+let activeExam = null;    // rozpracovaný test; při odchodu se zastaví jeho časovač
+
+function viewExam(main, kind) {
+  main.appendChild(h(doc, 'h1', { class: 'page-title', text: EXAMS[kind].title }));
+  const box = h(doc, 'div', { class: 'exam' });
+  main.appendChild(box);
+  activeExam = mountExam(box, kind, { topics });
+}
 
 // Postup krok za krokem: příklad zvoleného typu (type.generate(rng) vrací celý příklad),
 // nebo pevný příklad z cvičebnice (FIXED_TYPE, seed = pořadí v seznamu). Řešení se ukáže na tabuli.
@@ -309,13 +319,15 @@ function render() {
   const main = $('#main');
   activeStepper?.destroy();
   activeStepper = null;
+  activeExam?.destroy();
+  activeExam = null;
   main.textContent = '';
   doc.body.dataset.route = route.name;
   renderTopicList(route);
   renderExtraNav(route);
   if (route.name === 'home') viewHome(main);
   else if (route.name === 'topic') viewTopic(main, route);
-  else if (route.name === 'exam') viewPlaceholder(main, route.kind === 'zapocet' ? 'Zápočtový test' : 'Zkouška', 'Zkouškový režim se připravuje.');
+  else if (route.name === 'exam') viewExam(main, route.kind);
   else if (route.name === 'formulas') viewPlaceholder(main, 'Přehled vzorců', 'Přehled vzorců se připravuje.');
   else viewNotFound(main);
   let title = null;

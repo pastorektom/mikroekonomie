@@ -88,7 +88,7 @@ function buildRovnovaha({ a, b, c, d, ask }) {
   const askP = ask === 'P';
   return mk('rovnovaha', {
     data: { a, b, c, d, ask },
-    task: `Poptávku po zboží popisuje první rovnice, nabídku druhá (P je cena v Kč, Q množství v kusech). Určete rovnovážnou ${askP ? 'cenu' : 'množství'}.`,
+    task: `Poptávku po zboží popisuje první rovnice, nabídku druhá (P je cena v Kč, Q množství v kusech). Určete ${askP ? 'rovnovážnou cenu' : 'rovnovážné množství'}.`,
     promptTex: `${demandEq(a, b)},\\qquad ${supplyEq(c, d)}`,
     answerSpec: { kind: 'number', value: askP ? P : Q },
     conclusion: `Rovnovážná cena je ${czText(P)} Kč, rovnovážné množství ${czText(Q)} ks.`,
@@ -122,7 +122,7 @@ function buildRovnovahaInv({ A, B, C, D, ask }) {
   const askQ = ask === 'Q';
   return mk('rovnovaha-inv', {
     data: { A, B, C, D, ask },
-    task: `Poptávka je dána první rovnicí a nabídka druhou (P je cena, Q množství). Určete rovnovážnou ${askQ ? 'množství' : 'cenu'}.`,
+    task: `Poptávka je dána první rovnicí a nabídka druhou (P je cena, Q množství). Určete ${askQ ? 'rovnovážné množství' : 'rovnovážnou cenu'}.`,
     promptTex: `${invDemandEq(A, B)},\\qquad ${invSupplyEq(C, D)}`,
     answerSpec: { kind: 'number', value: askQ ? Q : P },
     conclusion: `Rovnovážné množství je ${czText(Q)} a rovnovážná cena ${czText(P)}.`,

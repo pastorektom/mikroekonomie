@@ -440,3 +440,28 @@ body[data-auth="login"] .shell { display: block; }
 }
 
 .prompt-viz { margin: 12px 0 0; max-width: 40em; }
+
+/* ---------- zkouška nanečisto ---------- */
+
+.exam { max-width: 40rem; }
+.exam-rules { margin: 0 0 18px; padding-left: 1.2em; color: var(--ink-soft); }
+.exam-rules li { margin-bottom: 4px; }
+.exam-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+.exam-position { font-family: var(--font-head); font-weight: 700; font-size: var(--step-1); letter-spacing: -0.02em; }
+.exam-time { color: var(--ink-soft); font-weight: 600; }
+.exam-clock { font-family: var(--font-head); font-weight: 700; font-size: 1.5rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.exam-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.exam-dot {
+  min-width: 40px; min-height: 40px; padding: 0 8px; font: inherit; font-weight: 650; font-size: var(--step--1);
+  color: var(--ink); background: var(--surface); border: 1.5px solid transparent; border-radius: 999px; cursor: pointer;
+}
+.exam-dot.answered { background: color-mix(in srgb, var(--marker) 55%, var(--surface)); }
+.exam-dot[aria-current="true"] { border-color: var(--ink); }
+.exam-q { background: var(--surface); border-radius: var(--radius-panel); padding: 18px 20px; margin-bottom: 14px; }
+.exam-q[hidden] { display: none; }
+.exam-nav { display: flex; gap: 10px; }
+.exam-nav .btn { flex: 1; }
+.exam-estimate { font-family: var(--font-head); font-weight: 700; font-size: var(--step-1); letter-spacing: -0.02em; margin: 8px 0; padding: 12px 16px; border-radius: var(--radius-frame); background: var(--marker); color: #10131a; }
+.exam-note { color: var(--ink-soft); font-size: var(--step--1); }
+.exam-self, .exam-wrong li { background: var(--surface); border-radius: var(--radius-frame); padding: 14px 16px; margin: 10px 0; }
+.exam-wrong { list-style: none; margin: 0; padding: 0; }
