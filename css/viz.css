@@ -61,3 +61,16 @@ svg.viz {
 .viz .viz-diag { stroke-width: 3; opacity: 0.7; stroke-linecap: round; }
 .viz .viz-arrow { stroke: var(--board-accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .viz .viz-glyph { stroke: var(--board-chalk); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Ekonomické grafy (js/viz/econ.js) */
+.viz .viz-guide { stroke: rgba(233, 236, 232, 0.55); stroke-width: 1.4; }
+.viz .viz-area { stroke: none; }
+.viz .viz-area-accent { fill: rgba(240, 160, 82, 0.28); }
+.viz .viz-area-blue { fill: rgba(156, 196, 255, 0.26); }
+.viz .viz-area-green { fill: rgba(159, 216, 166, 0.26); }
+.viz .viz-area-warn { fill: rgba(240, 120, 110, 0.28); }
+.viz .viz-area-chalk { fill: rgba(233, 236, 232, 0.2); }
+.viz .viz-label-blue { fill: #9cc4ff; }
+.viz .viz-label-green { fill: #9fd8a6; }
+.viz .viz-label-warn { fill: var(--board-warn); }
+.viz .viz-label-chalk { fill: var(--board-chalk); }

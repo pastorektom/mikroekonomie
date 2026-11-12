@@ -1,10 +1,11 @@
 // Dispečer grafických pomůcek kroku: step.viz = { kind, data } -> js/viz/<kind>.js draw(svg, data).
 // Pomůcka se kreslí do stejného tmavého rámu jako tabule (třída .board), takže řešení působí jednotně.
+import * as econ from './econ.js';
 
-const MODULES = {};
-// Další druhy grafiky (např. ekonomické křivky) se zaregistrují zde: registerViz('econ', modul).
+const MODULES = { econ };
+// Další druhy grafiky lze přidat přes registerViz(druh, modul); ekonomické grafy jsou druh „econ“.
 export function registerViz(kind, mod) { MODULES[kind] = mod; VIZ_KINDS.add(kind); }
-export const VIZ_KINDS = new Set();
+export const VIZ_KINDS = new Set(Object.keys(MODULES));
 
 export function disposeViz(target) {
   if (!target?.querySelectorAll) return;
