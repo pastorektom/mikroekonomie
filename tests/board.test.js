@@ -295,51 +295,48 @@ function lum(hex) {
 }
 const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 
-test('--chalk má ve světlém režimu kontrast ≥ 4,5 : 1 na bílé i na papíru', () => {
-  const css = readFileSync(new URL('../css/app.css', import.meta.url), 'utf8');
-  const root = css.slice(css.indexOf(':root {'), css.indexOf('}', css.indexOf(':root {')));
-  const chalk = /--chalk:\s*(#[0-9a-f]{6})/i.exec(root)[1];
-  const paper = /--paper:\s*(#[0-9a-f]{6})/i.exec(root)[1];
-  assert.ok(contrast(chalk, '#ffffff') >= 4.5, `kontrast ${contrast(chalk, '#ffffff').toFixed(2)}`);
-  assert.ok(contrast(chalk, paper) >= 4.5, `kontrast na papíru ${contrast(chalk, paper).toFixed(2)}`);
+// Barvy vzhledu se čtou přímo z css/app.css (první :root = světlý režim, druhý v @media = tmavý).
+function tokens(block) {
+  return Object.fromEntries([...block.matchAll(/(--[\w-]+):\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1], m[2]]));
+}
+const appCss = readFileSync(new URL('../css/app.css', import.meta.url), 'utf8');
+const lightRoot = appCss.slice(appCss.indexOf(':root {'), appCss.indexOf('}', appCss.indexOf(':root {')));
+const darkStart = appCss.indexOf('@media (prefers-color-scheme: dark)');
+const darkRoot = appCss.slice(appCss.indexOf(':root {', darkStart), appCss.indexOf('}', appCss.indexOf(':root {', darkStart)));
+const LIGHT = tokens(lightRoot);
+const DARK = { ...LIGHT, ...tokens(darkRoot) };
+
+for (const [name, T] of [['světlý', LIGHT], ['tmavý', DARK]]) {
+  test(`kontrast textových barev v ${name} režimu je ≥ 4,5 : 1 na ploše i na papíru`, () => {
+    for (const fg of ['--ink', '--ink-soft', '--d', '--s-text', '--good', '--bad']) {
+      for (const bg of ['--surface', '--paper']) {
+        const c = contrast(T[fg], T[bg]);
+        assert.ok(c >= 4.5, `${fg} na ${bg} (${name}): ${c.toFixed(2)}`);
+      }
+    }
+  });
+}
+
+test('text na zvýrazňovači (#10131a na --marker) má kontrast ≥ 7 : 1', () => {
+  assert.ok(contrast('#10131a', LIGHT['--marker']) >= 7);
+  assert.ok(contrast('#10131a', DARK['--marker']) >= 7);
 });
 
-// KaTeX kreslí \ne jako „=“ s přeškrtnutím ze soukromého znaku U+E020 písma KaTeX_Main (třída .mrel).
-// Rukopisné písmo ho nemá; bez KaTeX písem v záložním řetězci se ukázal prázdný čtvereček.
-// Stejně ≤, ≥, ≈, ∈, ∪, ∅, ∞: rukopis je jen pro znaky, které písmo má, zbytek z písem KaTeXu.
-function cssRules(css) {
-  const out = [];
-  const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
-  for (const m of clean.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const decls = Object.fromEntries(m[2].split(';').map((d) => d.split(':')).filter((d) => d.length >= 2)
-      .map(([k, ...v]) => [k.trim(), v.join(':').trim()]));
-    out.push({ selectors: m[1].split(',').map((s) => s.trim().replace(/\s+/g, ' ')), decls });
-  }
-  return out;
-}
-function fontsFor(rules, selector) {
-  const vars = {};
-  for (const r of rules) for (const [k, v] of Object.entries(r.decls)) if (k.startsWith('--')) vars[k] = v;
-  let ff = null;
-  for (const r of rules) if (r.selectors.includes(selector) && r.decls['font-family']) ff = r.decls['font-family'];
-  if (ff === null) return null;
-  ff = ff.replace(/var\((--[\w-]+)\)/g, (_, n) => vars[n] ?? '');
-  return ff.split(',').map((s) => s.trim().replace(/^['"]|['"]$/g, ''));
-}
+test('modrá (poptávka) a korálová (nabídka) jsou na ploše odlišitelné i pro barvoslepé: liší se světlostí', () => {
+  const dl = lum(LIGHT['--d']); const sl = lum(LIGHT['--s']);
+  assert.ok(Math.abs(dl - sl) >= 0.08, `rozdíl světlosti ${Math.abs(dl - sl).toFixed(3)}`);
+});
 
-test('css/board.css: symboly vzorců na tabuli zůstávají z písem KaTeXu (\ne, \le, \in, \cup …)', () => {
-  const rules = cssRules(readFileSync(new URL('../css/board.css', import.meta.url), 'utf8'));
-  for (const cls of ['', ' .mrel', ' .mbin', ' .mord', ' .mop', ' .mpunct', ' .mathnormal']) {
-    const sel = `.board .katex${cls}`;
-    const fonts = fontsFor(rules, sel);
-    assert.ok(fonts, `${sel}: chybí font-family`);
-    const iMain = fonts.indexOf('KaTeX_Main');
-    const iAms = fonts.indexOf('KaTeX_AMS');
-    assert.ok(iMain >= 0 && iAms >= 0, `${sel}: v řetězci písem chybí KaTeX_Main/KaTeX_AMS: ${fonts}`);
-    // před písmy KaTeXu smí být jen rukopis s omezeným rozsahem znaků (Patrick Hand); systémová
-    // záložní písma (Segoe Print, Comic Sans, cursive) by soukromý znak U+E020 nahradila čtverečkem
-    const before = fonts.slice(0, Math.min(iMain, iAms));
-    assert.deepEqual(before, ['Patrick Hand'], `${sel}: před KaTeX písmy je ${before}`);
+// KaTeX kreslí \ne jako „=“ s přeškrtnutím ze soukromého znaku U+E020 písma KaTeX_Main. Kdyby board.css
+// přepsal písmo vzorců na jiné, symboly (≠, ≤, ≥, ∈, ∪ …) by se ukázaly jako prázdné čtverečky.
+test('css/board.css nepřepisuje font-family vzorců, symboly zůstávají z písem KaTeXu', () => {
+  const css = readFileSync(new URL('../css/board.css', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (/\.katex/.test(m[1])) assert.ok(!/font-family/.test(m[2]), `${m[1].trim()} přepisuje font-family`);
   }
-  assert.deepEqual(fontsFor(rules, '.board .katex .amsrm')?.[0], 'KaTeX_AMS', 'AMS symboly z KaTeX_AMS');
+});
+
+test('css/board.css je uložen bez BOM', () => {
+  const buf = readFileSync(new URL('../css/board.css', import.meta.url));
+  assert.notDeepEqual([...buf.subarray(0, 3)], [0xef, 0xbb, 0xbf]);
 });

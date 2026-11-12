@@ -1,24 +1,16 @@
-/* Řešení na tabuli (js/viz/board.js): tmavá tabule, vzorce rukopisným písmem jako křídou,
-   oranžové poznámky. Tabule je tmavá v obou režimech. */
+/* Řešení krok za krokem (js/viz/board.js): světlý pracovní list. Vzorce sází KaTeX, výsledek zvýrazňuje
+   žlutý zvýrazňovač, poznámky (závorky, škrtání, podtržení) jsou korálové. */
 
 .board {
-  --board-chalk: #e9ece8;
-  --board-accent: #f0a052;
-  --board-warn: #ff9a8a;
-  /* Patrick Hand má i latin-ext (č, ř, ž, ů, ě …), takže čeština na tabuli nemíchá písma. */
-  --board-hand: 'Patrick Hand', 'Segoe Print', 'Comic Sans MS', cursive;
-  /* Ve vzorcích: rukopis jen pro znaky, které Patrick Hand má (latinka, číslice, + − = …);
-     ostatní symboly (≠ skládané z U+E020, ≤, ≥, ≈, ∈, ∪, ∅, ∞ …) se po znacích dohledají v písmech
-     KaTeXu. Systémová písma (Segoe Print, cursive) proto nesmějí být před nimi – neznámý znak by
-     nahradila prázdným čtverečkem. */
-  --board-math: 'Patrick Hand', KaTeX_Main, KaTeX_AMS, KaTeX_Size1, 'Segoe Print', 'Comic Sans MS', cursive;
+  --board-chalk: var(--ink);
+  --board-accent: var(--s-text);
+  --board-warn: var(--bad);
+  --board-hand: var(--font-body);
   position: relative;
   max-width: 100%;
-  border-radius: var(--radius-m);
-  /* rám tabule */
-  padding: 6px;
-  background: #3a464d;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.18);
+  border-radius: var(--radius-frame);
+  background: var(--surface-2);
+  padding: 4px;
 }
 
 .board-scroll {
@@ -26,126 +18,66 @@
   overflow-x: auto;
   overflow-y: hidden;
   max-width: 100%;
-  border-radius: 4px;
-  background-color: var(--board);
-  /* jemná textura křídy: rozmazané šmouhy, žádné obrázky */
-  background-image:
-    radial-gradient(120% 60% at 15% 10%, rgba(255, 255, 255, 0.045), transparent 60%),
-    radial-gradient(90% 50% at 85% 85%, rgba(255, 255, 255, 0.035), transparent 60%),
-    repeating-linear-gradient(-28deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 7px);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.35);
-  scrollbar-color: rgba(233, 236, 232, 0.35) transparent;
+  border-radius: 12px;
   -webkit-overflow-scrolling: touch;
 }
-.board-scroll:focus-visible { outline: 3px solid var(--board-accent); outline-offset: 2px; }
+.board-scroll:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 .board-inner {
   position: relative;
   width: max-content;
   min-width: 100%;
-  box-sizing: border-box; /* min-width 100 % včetně odsazení – jinak tabule vždy přetéká o padding */
-  padding: 18px 16px 22px;
+  box-sizing: border-box;
+  padding: 16px 16px 20px;
 }
 
-.board-line {
-  color: var(--board-chalk);
-  padding: 6px 4px;
-  font-size: 1.15rem;
-}
-.board-line + .board-line { margin-top: 22px; }
+.board-line { color: var(--board-chalk); padding: 6px 4px; font-size: 1.15rem; }
+.board-line + .board-line { margin-top: 18px; }
 .board-line.has-over { padding-top: 34px; }
-.board-line.has-under { padding-bottom: 30px; }
+.board-line.has-under { padding-bottom: 10px; }
 
 .board-tex .katex-display { margin: 0; text-align: left; }
 .board-tex .katex-display > .katex { text-align: left; }
-.board-tex.tex-fallback { font-family: var(--board-hand); }
 
-/* Vzorce rukopisem: písmo KaTeXu se v tabuli nahradí rukopisným (velké závorky a odmocniny
-   zůstávají z KaTeX_Size*). Kurzíva proměnných se ruší – na tabuli se píše rovně. */
-.board .katex,
-.board .katex .mathnormal,
-.board .katex .mathit,
-.board .katex .mathrm,
-.board .katex .mainrm,
-.board .katex .textrm,
-.board .katex .mop,
-.board .katex .mord,
-.board .katex .mbin,
-.board .katex .mrel,
-.board .katex .mpunct {
-  font-family: var(--board-math);
-  font-style: normal;
-}
-/* symboly AMS (⩽, ⩾, ∅ jako arnothing …) jsou jen v KaTeX_AMS */
-.board .katex .amsrm { font-family: KaTeX_AMS; }
-.board .katex { font-size: 1.32em; letter-spacing: 0.01em; text-shadow: 0 0 1px rgba(233, 236, 232, 0.35); }
-/* zlomková čára tlustší, jako tah křídou (KaTeX ji nastavuje inline, proto !important) */
-.board .katex .frac-line { border-bottom-color: currentColor; border-bottom-width: 0.065em !important; opacity: 0.85; }
+.board .katex { font-size: 1.3em; }
 .board .katex .bc-accent { color: var(--board-accent); }
 .board .katex .bc-warn { color: var(--board-warn); }
+/* výsledek: zvýrazňovač pod řádkem */
+.board .katex .bt-vysledek {
+  background: linear-gradient(transparent 52%, var(--marker) 52%, var(--marker) 94%, transparent 94%);
+  padding: 0 0.2em; border-radius: 3px;
+}
+@media (prefers-color-scheme: dark) { .board .katex .bt-vysledek { color: #f4f6ff; } }
 
-/* textový popis poznámek jen pro čtečky obrazovky */
 .board-sr {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
   clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
 }
 
-/* vrstva poznámek nad řádky */
-.board-notes {
-  position: absolute; left: 0; top: 0;
-  overflow: visible;
-  pointer-events: none;
-}
-.board-notes path {
-  fill: none;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.board-notes text {
-  font-family: var(--board-hand);
-  font-size: 22px;
-  stroke: none;
-}
+.board-notes { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.board-notes path { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.board-notes text { font-family: var(--board-hand); font-weight: 650; font-size: 18px; stroke: none; }
 .bn-accent path { stroke: var(--board-accent); }
 .bn-accent text { fill: var(--board-accent); }
 .bn-warn path { stroke: var(--board-warn); }
 .bn-warn text { fill: var(--board-warn); }
 .bn-strike path { stroke-width: 2.4; }
+/* dvojité podtržení nahrazuje zvýrazňovač */
+.bn-doubleUnderline { display: none; }
 
-/* psaní nového řádku zleva doprava, potom se dokreslí poznámky */
-@keyframes board-write {
-  from { clip-path: inset(0 100% 0 0); }
-  to { clip-path: inset(0 0 0 0); }
-}
-@keyframes board-stroke {
-  from { stroke-dashoffset: 1; }
-  to { stroke-dashoffset: 0; }
-}
-@keyframes board-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.board-line.is-new {
-  clip-path: inset(0 100% 0 0);
-  animation: board-write 900ms cubic-bezier(0.45, 0.05, 0.4, 1) var(--d, 0ms) forwards;
-}
-.bn.is-new path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: board-stroke 500ms ease-out var(--nd, 0ms) forwards;
-}
-.bn.is-new text {
-  opacity: 0;
-  animation: board-fade 300ms ease-out calc(var(--nd, 0ms) + 250ms) forwards;
-}
+@keyframes board-write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes board-stroke { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes board-fade { from { opacity: 0; } to { opacity: 1; } }
+.board-line.is-new { clip-path: inset(0 100% 0 0); animation: board-write 700ms cubic-bezier(0.45, 0.05, 0.4, 1) var(--d, 0ms) forwards; }
+.bn.is-new path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: board-stroke 500ms ease-out var(--nd, 0ms) forwards; }
+.bn.is-new text { opacity: 0; animation: board-fade 300ms ease-out calc(var(--nd, 0ms) + 250ms) forwards; }
 @media (prefers-reduced-motion: reduce) {
   .board-line.is-new { clip-path: none; animation: none; }
   .bn.is-new path { stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
   .bn.is-new text { opacity: 1; animation: none; }
 }
 
-/* Krokovač s tabulí: popisek pod tabulí „Krok N z M. …“ jako na předloze. */
+/* Krokovač s listem: popisek pod listem „Krok N z M. …“ */
 .stepper:has(.board) .stepper-visual { padding: 0; background: none; overflow: visible; }
 .stepper:has(.board) .stepper-head .stepper-counter {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
@@ -153,23 +85,16 @@
 }
 .stepper-caption-count { display: none; }
 .stepper:has(.board) .stepper-body {
-  padding: 12px 16px;
-  border-left: 4px solid var(--chalk);
-  border-radius: var(--radius-s);
-  background: var(--blue-soft);
+  padding: 12px 16px; border-radius: var(--radius-frame);
+  background: color-mix(in srgb, var(--marker) 38%, var(--surface));
 }
-.stepper:has(.board) .stepper-caption-count {
-  display: inline;
-  font-weight: 700;
-  color: var(--ink);
-  margin-right: 0.35em;
-}
-.stepper:has(.board) .stepper-title { display: inline; font-family: var(--font-body); font-size: var(--step-0); font-weight: 700; }
+.stepper:has(.board) .stepper-caption-count { display: inline; font-weight: 800; margin-right: 0.35em; }
+.stepper:has(.board) .stepper-title { display: inline; font-family: var(--font-body); font-size: var(--step-0); font-weight: 700; letter-spacing: 0; }
 .stepper:has(.board) .stepper-text { margin-top: 4px; }
 
 @media (min-width: 900px) {
-  .board { padding: 12px; }
-  .board-inner { padding: 28px 36px 32px; }
+  .board { padding: 8px; }
+  .board-inner { padding: 24px 32px 28px; }
   .board-line { font-size: 1.3rem; }
-  .board-line + .board-line { margin-top: 28px; }
+  .board-line + .board-line { margin-top: 22px; }
 }

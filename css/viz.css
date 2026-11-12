@@ -1,76 +1,42 @@
-/* Grafické pomůcky kroků (js/viz/*.js): kreslí se v tmavém rámu tabule, křídově bílé tahy,
-   oranžový akcent pro pivoty, asymptoty a označené body. Rám a písmo dědí z css/board.css. */
+/* Grafy (js/viz/econ.js). Kobaltová křivka je poptávka (viz-c-blue), korálová nabídka (viz-c-chalk),
+   inkoustová čárkovaná je posunutá křivka (viz-c-accent), žlutý bod je rovnováha. */
 
 .viz-board { margin: 0; }
 .viz-scroll {
-  border-radius: 4px;
-  background-color: var(--board);
-  background-image:
-    radial-gradient(120% 60% at 15% 10%, rgba(255, 255, 255, 0.045), transparent 60%),
-    radial-gradient(90% 50% at 85% 85%, rgba(255, 255, 255, 0.035), transparent 60%);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-frame);
+  background: var(--surface-2);
   padding: 6px 4px;
   max-width: 100%;
   overflow: hidden;
 }
-svg.viz {
-  display: block;
-  width: 100%;
-  max-width: 560px;
-  height: auto;
-  margin: 0 auto;
-  font-family: var(--board-hand);
-  color: var(--board-chalk);
-}
-.viz text { fill: var(--board-chalk); font-family: var(--board-hand); font-size: 16px; }
-.viz .viz-ticks text { font-size: 12px; fill: rgba(233, 236, 232, 0.7); }
+.viz-joined { margin-top: 10px; }
+svg.viz { display: block; width: 100%; max-width: 560px; height: auto; margin: 0 auto; font-family: var(--font-body); color: var(--ink); }
+
+.viz text { fill: var(--ink); font-family: var(--font-head); font-weight: 700; font-size: 17px; }
+.viz .viz-ticks text { font-family: var(--font-body); font-weight: 500; font-size: 12px; fill: var(--ink-soft); }
 .viz .viz-label { font-size: 17px; }
-.viz .viz-label-accent { fill: var(--board-accent); }
-.viz .viz-cell { font-size: 21px; }
-.viz .viz-op { font-size: 18px; fill: var(--board-accent); }
-.viz .viz-sign { font-size: 26px; }
-.viz .viz-sign-plus { fill: #9fd8a6; }
-.viz .viz-sign-minus { fill: var(--board-warn); }
-.viz .viz-at { font-size: 14px; fill: var(--board-accent); }
-.viz .viz-rowlabel { font-size: 19px; }
+.viz .viz-label-accent { fill: var(--ink); }
+.viz .viz-label-blue { fill: var(--d); }
+.viz .viz-label-chalk { fill: var(--s-text); }
+.viz .viz-label-green { fill: var(--good); }
+.viz .viz-label-warn { fill: var(--bad); }
 
-.viz .viz-grid line, .viz .viz-grid-v, .viz .viz-rowline { stroke: rgba(233, 236, 232, 0.13); stroke-width: 1; }
-.viz .viz-axis { stroke: rgba(233, 236, 232, 0.8); stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.viz .viz-curve { stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
-.viz .viz-c-chalk { stroke: var(--board-chalk); }
-.viz .viz-c-accent { stroke: var(--board-accent); }
-.viz .viz-c-warn { stroke: var(--board-warn); }
-.viz .viz-c-blue { stroke: #9cc4ff; }
-.viz .viz-c-green { stroke: #9fd8a6; }
-.viz .viz-asymptote { stroke: var(--board-accent); stroke-width: 1.8; opacity: 0.9; }
-.viz .viz-tangent { stroke: var(--board-accent); stroke-width: 2.4; stroke-linecap: round; }
-.viz .viz-line { stroke: #9cc4ff; stroke-width: 2; }
-.viz .viz-point { fill: var(--board-accent); stroke: var(--board-accent); stroke-width: 2; }
-.viz .viz-point.viz-c-chalk { fill: var(--board-chalk); }
-.viz .viz-point.viz-c-blue { fill: #9cc4ff; }
-.viz .viz-point.viz-c-green { fill: #9fd8a6; }
-.viz .viz-point.viz-c-warn { fill: var(--board-warn); }
-.viz .viz-point.viz-open { fill: var(--board); }
+.viz .viz-grid line { stroke: var(--line); stroke-width: 1; opacity: 0.7; }
+.viz .viz-axis { stroke: var(--ink); stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.viz .viz-curve { stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.viz .viz-c-blue { stroke: var(--d); }
+.viz .viz-c-chalk { stroke: var(--s); }
+.viz .viz-c-accent { stroke: var(--ink); }
+.viz .viz-c-warn { stroke: var(--bad); }
+.viz .viz-c-green { stroke: var(--good); }
 
-.viz .viz-bracket, .viz .viz-bar { stroke: var(--board-chalk); stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.viz .viz-bar { stroke-dasharray: 3 5; }
-.viz .viz-hl { fill: rgba(240, 160, 82, 0.16); stroke: none; }
-.viz .viz-hl-cell { fill: rgba(240, 160, 82, 0.28); }
-.viz .viz-changed { fill: rgba(159, 216, 166, 0.14); stroke: rgba(159, 216, 166, 0.5); stroke-width: 1; }
-.viz .viz-pivot { fill: none; stroke: var(--board-accent); stroke-width: 2.6; }
-.viz .viz-diag { stroke-width: 3; opacity: 0.7; stroke-linecap: round; }
-.viz .viz-arrow { stroke: var(--board-accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.viz .viz-glyph { stroke: var(--board-chalk); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.viz .viz-point { fill: var(--marker); stroke: var(--ink); stroke-width: 2.4; }
+.viz .viz-guide { stroke: var(--ink-soft); stroke-width: 1.5; }
+.viz .viz-arrow { stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Ekonomické grafy (js/viz/econ.js) */
-.viz .viz-guide { stroke: rgba(233, 236, 232, 0.55); stroke-width: 1.4; }
 .viz .viz-area { stroke: none; }
-.viz .viz-area-accent { fill: rgba(240, 160, 82, 0.28); }
-.viz .viz-area-blue { fill: rgba(156, 196, 255, 0.26); }
-.viz .viz-area-green { fill: rgba(159, 216, 166, 0.26); }
-.viz .viz-area-warn { fill: rgba(240, 120, 110, 0.28); }
-.viz .viz-area-chalk { fill: rgba(233, 236, 232, 0.2); }
-.viz .viz-label-blue { fill: #9cc4ff; }
-.viz .viz-label-green { fill: #9fd8a6; }
-.viz .viz-label-warn { fill: var(--board-warn); }
-.viz .viz-label-chalk { fill: var(--board-chalk); }
+.viz .viz-area-accent { fill: var(--marker); opacity: 0.7; }
+.viz .viz-area-blue { fill: var(--d); opacity: 0.18; }
+.viz .viz-area-green { fill: var(--good); opacity: 0.2; }
+.viz .viz-area-warn { fill: var(--bad); opacity: 0.2; }
+.viz .viz-area-chalk { fill: var(--s); opacity: 0.18; }

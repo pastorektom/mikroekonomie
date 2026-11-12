@@ -7,6 +7,10 @@ import { mountStepper } from './ui/stepper.js';
 import { stepVisual, disposeStepVisual } from './viz/step.js';
 import { topics as courseTopics, sortTopics } from './topics/index.js';
 import { makeRng, randomSeed } from './rng.js';
+import { equilibrium } from './econ.js';
+import { drawEcon } from './viz/econ.js';
+import { demandExpr, supplyExpr } from './topics/lib.js';
+import { czText } from './topics/lib.js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 import { initAuth, currentUser, signOut, onAuthEvent } from './auth.js';
 import { initProgress, setProgressUser, flushQueue } from './progress.js';
@@ -79,22 +83,117 @@ function renderTabs(route) {
 
 const soon = (text) => h(doc, 'p', { class: 'empty', text });
 
+// ---------- domů ----------
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const BASE_MARKET = { a: 100, b: 2, c: 10, d: 1 }; // Q_D = 100 − 2P, Q_S = 10 + P → E = (Q 40, P 30)
+const ZAPOCET = { date: new Date(2026, 11, 14), label: '14. 12. 2026' };
+
+function daysUntil(date, now = new Date()) {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((date - today) / 86400000);
+}
+
+function remainingText(days) {
+  if (days > 4) return `zbývá ${days} dní`;
+  if (days > 1) return `zbývají ${days} dny`;
+  if (days === 1) return 'zbývá 1 den';
+  return days === 0 ? 'je dnes' : 'už proběhl';
+}
+
+const trendWord = (v) => (v === 0 ? 'beze změny' : v > 0 ? 'roste' : 'klesá');
+
+// Živý graf: dva posuvníky posouvají poptávku a nabídku a ukazují, kam se přesune rovnováha.
+function liveMarket() {
+  const e0 = equilibrium(BASE_MARKET);
+  const svg = doc.createElementNS(SVG_NS, 'svg');
+  const box = h(doc, 'section', { class: 'live', 'aria-label': 'Živý graf trhu' });
+  const plot = h(doc, 'div', { class: 'live-plot' }, svg);
+  const statP = h(doc, 'div', { class: 'stat' });
+  const statQ = h(doc, 'div', { class: 'stat' });
+
+  function slider(kind, label, min, max) {
+    const id = `live-${kind}`;
+    const out = h(doc, 'output', { for: id, 'aria-live': 'polite', text: trendWord(0) });
+    const input = h(doc, 'input', { type: 'range', id, min: String(min), max: String(max), step: '5', value: '0' });
+    const row = h(doc, 'div', { class: `slider slider-${kind}` }, [
+      h(doc, 'label', { for: id }, [h(doc, 'span', {}, [h(doc, 'span', { class: 'dot' }), label]), out]),
+      input,
+    ]);
+    return { row, input, out };
+  }
+  const dem = slider('d', 'Poptávka', -30, 40);
+  const sup = slider('s', 'Nabídka', -30, 30);
+
+  // Čísla se ukazují na desetiny (rovnováha při posunu nemusí vyjít celá).
+  const tenth = (v) => Math.round(v * 10) / 10;
+  function stat(el, name, value, base) {
+    const delta = tenth(value - base);
+    el.textContent = '';
+    el.append(h(doc, 'small', { text: name }), h(doc, 'b', { text: czText(tenth(value)) }));
+    if (delta !== 0) el.append(h(doc, 'i', { text: `${delta > 0 ? '+' : '−'}${czText(Math.abs(delta))}` }));
+  }
+
+  function update() {
+    const dv = Number(dem.input.value); const sv = Number(sup.input.value);
+    const a = BASE_MARKET.a + dv; const c = BASE_MARKET.c + sv;
+    const e = equilibrium({ a, b: BASE_MARKET.b, c, d: BASE_MARKET.d });
+    const moved = dv !== 0 || sv !== 0;
+    drawEcon(svg, {
+      axes: { x: 'Q', y: 'P' }, domain: [0, 150], range: [0, 75],
+      curves: [
+        ...(moved ? [
+          { expr: demandExpr(BASE_MARKET.a, BASE_MARKET.b), color: 'accent', dashed: true },
+          { expr: supplyExpr(BASE_MARKET.c, BASE_MARKET.d), color: 'accent', dashed: true },
+        ] : []),
+        { expr: demandExpr(a, BASE_MARKET.b), label: 'D', color: 'blue' },
+        { expr: supplyExpr(c, BASE_MARKET.d), label: 'S', color: 'chalk' },
+      ],
+      points: [{ x: e.Q, y: e.P, label: 'E', guides: true }],
+      alt: `Rovnováha na trhu: cena ${czText(tenth(e.P))}, množství ${czText(tenth(e.Q))}`,
+    });
+    dem.out.textContent = trendWord(dv);
+    sup.out.textContent = trendWord(sv);
+    stat(statP, 'Rovnovážná cena', e.P, e0.P);
+    stat(statQ, 'Rovnovážné množství', e.Q, e0.Q);
+  }
+  dem.input.addEventListener('input', update);
+  sup.input.addEventListener('input', update);
+  box.append(plot, h(doc, 'div', { class: 'live-controls' }, [dem.row, sup.row]), h(doc, 'div', { class: 'live-readout' }, [statP, statQ]));
+  update();
+  return box;
+}
+
 function viewHome(main) {
-  main.appendChild(h(doc, 'h1', { class: 'page-title', text: APP_NAME }));
-  main.appendChild(h(doc, 'p', { class: 'lead', text: 'Vyberte téma. Výklad, procvičování a řešené postupy najdete uvnitř každého tématu.' }));
-  const grid = h(doc, 'div', { class: 'topic-cards' });
+  main.appendChild(h(doc, 'header', { class: 'hero' }, [
+    h(doc, 'h1', { text: APP_NAME }),
+    h(doc, 'p', { text: 'Posuň poptávku nebo nabídku a sleduj, kam se přesune rovnováha. Potom si vyber téma.' }),
+    liveMarket(),
+  ]));
+
+  const days = daysUntil(ZAPOCET.date);
+  main.appendChild(h(doc, 'div', { class: 'exams' }, [
+    h(doc, 'a', { class: 'exam-card', href: examHref('zapocet') }, [
+      h(doc, 'div', { class: 'when', text: `Zápočtový test ${ZAPOCET.label}, ${remainingText(days)}` }),
+      h(doc, 'div', { class: 'big' }, ['30', h(doc, 'span', { text: ' z 50 bodů' })]),
+      h(doc, 'p', { text: 'Počítané příklady ze cvičení, 50 minut.' }),
+    ]),
+    h(doc, 'a', { class: 'exam-card', href: examHref('zkouska') }, [
+      h(doc, 'div', { class: 'when', text: 'Zkouška' }),
+      h(doc, 'div', { class: 'big' }, ['12', h(doc, 'span', { text: ' z 20 bodů' })]),
+      h(doc, 'p', { text: 'Grafy, vztahy a definice ze všech témat, 50 minut.' }),
+    ]),
+  ]));
+
+  main.appendChild(h(doc, 'h2', { class: 'section-title', text: 'Témata' }));
+  const rows = h(doc, 'ul', { class: 'topic-rows' });
   topics.forEach((t, i) => {
-    grid.appendChild(h(doc, 'a', { class: 'topic-card', href: routeHref(t.id) }, [
+    rows.appendChild(h(doc, 'li', {}, h(doc, 'a', { class: 'topic-row', href: routeHref(t.id) }, [
       h(doc, 'span', { class: 'topic-num', text: String(i + 1) }),
       h(doc, 'span', { class: 'topic-name', text: t.title }),
-    ]));
+    ])));
   });
-  main.appendChild(grid);
-  main.appendChild(h(doc, 'p', { class: 'home-links' }, [
-    h(doc, 'a', { href: examHref('zapocet'), text: 'Zápočtový test' }), ' · ',
-    h(doc, 'a', { href: examHref('zkouska'), text: 'Zkouška' }), ' · ',
-    h(doc, 'a', { href: FORMULAS_HREF, text: 'Vzorce' }),
-  ]));
+  main.appendChild(rows);
+  main.appendChild(h(doc, 'p', { class: 'home-links' }, h(doc, 'a', { href: FORMULAS_HREF, text: 'Přehled vzorců' })));
 }
 
 function viewNotFound(main) {

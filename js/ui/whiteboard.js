@@ -32,11 +32,11 @@ export function canStartStroke(active, e) {
   return { start: stale, stale };
 }
 
-// Barvy křídy jsou vždy světlé na tmavé tabuli (--board), shodně s panelem řešení.
+// Kreslicí plocha je vždy světlý papír, pera jsou černé, modré (poptávka) a červené (nabídka).
 export const INKS = [
-  { id: 'ink', label: 'Bílá', css: '#eef2f0' },
-  { id: 'yellow', label: 'Žlutá', css: '#f2d16b' },
-  { id: 'blue', label: 'Modrá', css: '#7fc4f0' },
+  { id: 'ink', label: 'Černá', css: '#10131a' },
+  { id: 'red', label: 'Červená', css: '#e8452f' },
+  { id: 'blue', label: 'Modrá', css: '#2740f0' },
 ];
 const PEN_W = 2.6;
 const ERASER_W = 22;
@@ -192,7 +192,7 @@ export function mountWhiteboard(el, { onChange } = {}) {
         out.width = canvas.width; out.height = canvas.height;
         const c = out.getContext('2d');
         if (!c) return '';
-        c.fillStyle = win.getComputedStyle(root).getPropertyValue('--board').trim() || '#263238';
+        c.fillStyle = win.getComputedStyle(root).getPropertyValue('--board').trim() || '#ffffff';
         c.fillRect(0, 0, out.width, out.height);
         c.drawImage(canvas, 0, 0);
         return out.toDataURL('image/png');
