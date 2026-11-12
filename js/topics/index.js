@@ -2,16 +2,20 @@
 // s výchozím exportem { id, title, order, theory, types } (vzorem bude js/topics/tema02.js).
 // Dokud téma není hotové, má prázdný výklad i typy a aplikace ukáže „připravuje se“.
 import tema02 from './tema02.js';
+import tema03 from './tema03.js';
+import tema04 from './tema04.js';
+import tema05 from './tema05.js';
+import tema06 from './tema06.js';
 
 const stub = (order, id, title) => ({ id, title, order, theory: [], types: [] });
 
 export const topics = [
   stub(1, 'uvod', 'Úvod do ekonomického studia'),
   tema02,
-  stub(3, 'spotrebitel', 'Chování spotřebitele a formování poptávky'),
-  stub(4, 'nabidka', 'Nabídka na trhu výrobků a služeb'),
-  stub(5, 'dokonala-konkurence', 'Firma v podmínkách dokonalé konkurence'),
-  stub(6, 'nedokonala-konkurence', 'Nedokonalá konkurence'),
+  tema03,
+  tema04,
+  tema05,
+  tema06,
   stub(7, 'faktory', 'Trhy výrobních faktorů'),
   stub(8, 'prace', 'Trh práce'),
   stub(9, 'kapital', 'Trh kapitálu a přerozdělování důchodů'),
