@@ -353,7 +353,7 @@ function buildLerner({ a, b, c, ask }) {
     conclusion: `V optimu je Q = ${czText(Q)}, P = ${czText(P)}, elasticita ${czText(E)} a Lernerův index ${czText(L)}.`,
     source: { chapter: 7, number: '7.1/3d, 7.1/4d, 7.3/2d' },
     solution: [
-      { title: 'Optimum monopolu', text: 'Nejdřív najdeme množství a cenu z MR = MC.',
+      { title: 'Optimum monopolu', text: 'Nejdřív najdeme množství a cenu z MR = MC (MC musí protínat MR zdola a cena musí pokrýt AVC).',
         board: [line(`${cz(a)}-${coef(2 * b, 'Q')}=${cz(c)}`), line(`Q_M=${cz(Q)},\\quad P_M=${cz(P)}`)] },
       { title: 'Elasticita poptávky v bodě', text: `Elasticita je (dQ/dP)·P/Q. Z poptávky Q = (a − P)/b plyne dQ/dP = −1/b. Dosadíme P a Q v optimu a bereme absolutní hodnotu.`,
         board: [line(demandQ), line(`|E|=\\frac{1}{${cz(b)}}\\cdot\\frac{${cz(P)}}{${cz(Q)}}`), asked(ask === 'E', `|E|=${cz(E)}`)] },
@@ -666,7 +666,7 @@ const STRUCTS = [
   { id: 's9', text: 'Vláda udělila jediné firmě výhradní právo provozovat železniční dopravu na dané trati.', a: 'mon', why: 'Výhradní právo udělené státem je jednou z příčin vzniku monopolu.' },
   { id: 's10', text: 'Dvě největší firmy v odvětví se dohodly, že omezí produkci a rozdělí si trh.', a: 'oli', why: 'Dohoda několika málo firem o společném postupu je kartel, tedy forma oligopolu.' },
   { id: 's11', text: 'Jedna silná firma určuje cenu a několik menších firem tuto cenu jen přebírá.', a: 'oli', why: 'Oligopol s dominantní firmou: menší firmy tvoří konkurenční lem.' },
-  { id: 's12', text: 'Výrobci zubních past mají poptávku vysoce elastickou, protože existuje mnoho blízkých substitutů, a velká část nákladů jde na reklamu.', a: 'mk', why: 'Výrazná reklama a blízké substituty jsou typické pro monopolistickou konkurenci.' },
+  { id: 's12', text: 'Na trhu je mnoho malých výrobců s mírně odlišenými výrobky, každý má poptávku vysoce elastickou, protože existuje mnoho blízkých substitutů, a velká část nákladů jde na reklamu.', a: 'mk', why: 'Výrazná reklama a blízké substituty jsou typické pro monopolistickou konkurenci.' },
 ];
 const structById = (id) => STRUCTS.find((s) => s.id === id) ?? STRUCTS[0];
 

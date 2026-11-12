@@ -68,16 +68,16 @@ function quadEnv({ a, b, k }) {
 }
 
 // Graf nákladových křivek MC, AC a AVC s přídavky (cenová čára, body, plochy).
-function firmViz(env, { curves = [], points = [], areas = [], alt } = {}) {
+function firmViz(env, { curves = [], points = [], areas = [], alt, long = false } = {}) {
   return {
     kind: 'econ',
     data: {
       axes: { x: 'q', y: 'Kč' },
       domain: [0, env.xmax], range: [0, env.pmax],
       curves: [
-        { expr: env.mcE, label: 'MC', color: 'blue' },
-        { expr: env.acE, label: 'AC', color: 'chalk' },
-        { expr: env.avcE, label: 'AVC', color: 'green' },
+        { expr: env.mcE, label: long ? 'LMC' : 'MC', color: 'blue' },
+        { expr: env.acE, label: long ? 'LAC' : 'AC', color: 'chalk' },
+        ...(long ? [] : [{ expr: env.avcE, label: 'AVC', color: 'green' }]),
         ...curves,
       ],
       points, arrows: [], areas,
@@ -217,17 +217,17 @@ function buildRozhodnuti({ P, afc, avc, horizon }) {
   const ans = short ? decideSR(P, afc, avc) : decideLR(P, afc, avc);
   const verdict = { zisk: 'vyrábí se ziskem', ztrata: 'vyrábí se ztrátou', konec: 'ukončí výrobu' }[ans];
   const compareAC = P > ac ? `P=${cz(P)}>AC=${cz(ac)}` : `P=${cz(P)}<AC=${cz(ac)}`;
-  const steps = [
+  const steps = short ? [
     { title: 'Průměrné celkové náklady', text: 'Průměrné celkové náklady jsou součtem průměrných fixních a průměrných variabilních nákladů. S nimi se porovnává cena, aby se zjistil zisk na jeden kus.',
       board: [line(`AC=AFC+AVC=${cz(afc)}+${cz(avc)}=${cz(ac)}`)] },
-  ];
+  ] : [];
   if (short) {
     steps.push({ title: 'Porovnání ceny s AC', text: P > ac ? `Cena je vyšší než $AC$, firma má na každém kusu zisk ${czText(P - ac)} Kč.` : `Cena je nižší než $AC$, firma má na každém kusu ztrátu ${czText(ac - P)} Kč.`,
       board: [line(compareAC), line(`P-AC=${cz(P - ac)}`)] });
     steps.push({ title: 'Porovnání ceny s AVC', text: P > avc ? 'V krátkém období firma hradí fixní náklady, ať vyrábí, nebo ne. Dokud cena pokrývá variabilní náklady (a ještě něco z fixních), je lepší vyrábět.' : 'Cena nepokryje ani variabilní náklady. Každý vyrobený kus by prohlubel ztrátu, takže je lepší nevyrábět a ztratit jen fixní náklady.',
       board: [line(`P=${cz(P)}${P > avc ? '>' : '<'}AVC=${cz(avc)}`)] });
   } else {
-    steps.push({ title: 'Dlouhé období', text: 'V dlouhém období se mění všechny náklady a fixní náklady neexistují. Firma musí z ceny pokrýt celé průměrné náklady, jinak z odvětví odejde. Ztrátová výroba dlouhodobě nepřichází v úvahu.',
+    steps.push({ title: 'Dlouhé období', text: `V dlouhém období se mění všechny náklady a fixní náklady neexistují. Dlouhodobé průměrné náklady jsou $AC=${czText(ac)}$ Kč. Firma musí z ceny pokrýt celé průměrné náklady, jinak z odvětví odejde. Ztrátová výroba dlouhodobě nepřichází v úvahu.`,
       board: [line(compareAC)] });
     steps.push({ title: 'Rozhodnutí', text: P > ac ? 'Cena převyšuje $AC$, takže firma má ekonomický zisk a bude vyrábět.' : 'Cena je pod $AC$, ztrátu nelze trvale snášet, a firma proto odejde z odvětví.',
       board: [line(P > ac ? `P>AC\\ \\Rightarrow\\ \\text{zisk}` : `P<AC\\ \\Rightarrow\\ \\text{odchod}`)] });
@@ -235,7 +235,9 @@ function buildRozhodnuti({ P, afc, avc, horizon }) {
   steps.push({ title: 'Závěr', text: `${short ? 'V krátkém' : 'V dlouhém'} období firma ${verdict}.`, board: [result(`\\text{${{ zisk: 'výroba se ziskem', ztrata: 'výroba se ztrátou', konec: 'ukončení výroby' }[ans]}}`)] });
   return mk('rozhodnuti', {
     data: { P, afc, avc, horizon },
-    task: `Firma se pohybuje na dokonale konkurenčním trhu${short ? ' v krátkém období' : ' v dlouhém období'}. Vyrábí při průměrných fixních nákladech ${czText(afc)} Kč a průměrných variabilních nákladech ${czText(avc)} Kč. Svůj výrobek prodává za ${czText(P)} Kč. Jak se firma rozhodne?`,
+    task: short
+      ? `Firma se pohybuje na dokonale konkurenčním trhu v krátkém období. Vyrábí při průměrných fixních nákladech ${czText(afc)} Kč a průměrných variabilních nákladech ${czText(avc)} Kč. Svůj výrobek prodává za ${czText(P)} Kč. Jak se firma rozhodne?`
+      : `Firma se pohybuje na dokonale konkurenčním trhu v dlouhém období. Její dlouhodobé průměrné náklady jsou ${czText(ac)} Kč. Svůj výrobek prodává za ${czText(P)} Kč. Jak se firma rozhodne?`,
     answerSpec: { kind: 'choice', value: ans, options: DECISION_OPTIONS },
     conclusion: `${short ? 'V krátkém' : 'V dlouhém'} období firma ${verdict}.`,
     source: { chapter: 6, number: short ? 9 : 10 },
@@ -908,22 +910,23 @@ function buildGrafNabidka({ a, c, m, q0, obdobi }) {
   const env = cubicEnv({ a, c, m, q0 });
   const short = obdobi === 'kratke';
   const from = short ? m : q0; const P0 = short ? env.avcMin : env.acMin;
-  const base = firmViz(env);
+  const long = !short;
+  const base = firmViz(env, { long, alt: long ? 'Dlouhodobé křivky LMC a LAC firmy' : undefined });
   const point = { x: from, y: P0, label: short ? 'U' : 'R', guides: true };
-  const withPoint = firmViz(env, { points: [point], alt: short ? 'Bod uzavření v minimu AVC' : 'Bod vyrovnání v minimu AC' });
-  const full = firmViz(env, { curves: [{ expr: env.mcE, domain: [from, env.xmax], label: 'S', color: 'accent' }], points: [point], alt: 'Křivka nabídky firmy jako část MC' });
+  const withPoint = firmViz(env, { long, points: [point], alt: short ? 'Bod uzavření v minimu AVC' : 'Bod vyrovnání v minimu LAC' });
+  const full = firmViz(env, { long, curves: [{ expr: env.mcE, domain: [from, env.xmax], label: 'S', color: 'accent' }], points: [point], alt: long ? 'Dlouhodobá křivka nabídky firmy jako část LMC' : 'Křivka nabídky firmy jako část MC' });
   return mk('graf-nabidka-firmy', {
     part: 'zkouska',
     points: 2,
     data: { a, c, m, q0, obdobi },
-    task: `Nakreslete do grafu s osami q a Kč nákladové křivky MC, AC a AVC dokonale konkurenční firmy a vyznačte křivku nabídky firmy ${short ? 'v krátkém období a bod uzavření' : 'v dlouhém období a bod vyrovnání'}.`,
+    task: `Nakreslete do grafu s osami q a Kč ${short ? 'nákladové křivky MC, AC a AVC dokonale konkurenční firmy a vyznačte křivku nabídky firmy v krátkém období a bod uzavření' : 'dlouhodobé nákladové křivky LMC a LAC dokonale konkurenční firmy a vyznačte dlouhodobou křivku nabídky firmy a bod vyrovnání'}.`,
     answerSpec: { kind: 'whiteboard', reference: { kind: 'econ', data: full.data } },
-    conclusion: short ? 'Nabídka firmy v krátkém období je rostoucí část MC nad minimem AVC.' : 'Nabídka firmy v dlouhém období je rostoucí část MC nad minimem AC.',
+    conclusion: short ? 'Nabídka firmy v krátkém období je rostoucí část MC nad minimem AVC.' : 'Nabídka firmy v dlouhém období je rostoucí část LMC nad minimem LAC.',
     source: { chapter: 6, number: 'D-3' },
     solution: [
-      { title: 'Nákladové křivky', text: 'Nakreslíme $MC$, $AC$ a $AVC$. $MC$ protíná $AVC$ i $AC$ v jejich minimech.', viz: base },
-      { title: short ? 'Bod uzavření' : 'Bod vyrovnání', text: short ? 'Bod uzavření U je v minimu $AVC$. Pod touto cenou firma nevyrábí.' : 'Bod vyrovnání R je v minimu $AC$. Pod touto cenou by firma měla v dlouhém období ztrátu a z odvětví odejde.', viz: withPoint },
-      { title: 'Křivka nabídky', text: short ? 'Při každé ceně nad bodem U firma vyrábí tam, kde $P=MC$. Nabídkou je proto část $MC$ od bodu U výše.' : 'V dlouhém období nabízí firma jen při cenách nad minimem $AC$. Nabídkou je část $MC$ od bodu R výše.', viz: full },
+      { title: 'Nákladové křivky', text: short ? 'Nakreslíme $MC$, $AC$ a $AVC$. $MC$ protíná $AVC$ i $AC$ v jejich minimech.' : 'V dlouhém období fixní náklady neexistují, proto nakreslíme jen dlouhodobé mezní náklady $LMC$ a dlouhodobé průměrné náklady $LAC$. $LMC$ protíná $LAC$ v jejím minimu. Krátkodobá křivka $AC$ by se v tomto minimu dotýkala $LAC$ jen při optimální velikosti provozu.', viz: base },
+      { title: short ? 'Bod uzavření' : 'Bod vyrovnání', text: short ? 'Bod uzavření U je v minimu $AVC$. Pod touto cenou firma nevyrábí.' : 'Bod vyrovnání R je v minimu $LAC$. Pod touto cenou by firma měla v dlouhém období ztrátu a z odvětví odejde.', viz: withPoint },
+      { title: 'Křivka nabídky', text: short ? 'Při každé ceně nad bodem U firma vyrábí tam, kde $P=MC$. Nabídkou je proto část $MC$ od bodu U výše.' : 'V dlouhém období nabízí firma jen při cenách nad minimem $LAC$ a vyrábí tam, kde $P=LMC$. Nabídkou je část $LMC$ od bodu R výše.', viz: full },
     ],
   });
 }
@@ -1042,16 +1045,16 @@ const theory = [
     viz: demoGraph({ curves: [priceLine(31, 'P')], points: [{ x: 3, y: 31, label: 'U', guides: true }], alt: 'Bod uzavření v minimu AVC' }),
     mistakes: ['Bod uzavření není v minimu $AC$, ale v minimu $AVC$. V minimu $AC$ je bod vyrovnání.'] },
   { heading: 'Bod vyrovnání a dlouhé období', term: 'Bod vyrovnání',
-    text: 'V dlouhém období jsou všechny náklady variabilní. Firma, která trvale nepokryje celé průměrné náklady, z odvětví odejde. Bod vyrovnání je v minimu $AC$. Platí tu $P=MC=AC$, firma má nulový ekonomický zisk a získává jen normální zisk: výnos, který pokrývá alternativní náklady podnikatele.',
+    text: 'V dlouhém období jsou všechny náklady variabilní, existují jen dlouhodobé náklady $LMC$ a $LAC$. Firma, která trvale nepokryje celé průměrné náklady, z odvětví odejde. Bod vyrovnání je v minimu průměrných (celkových) nákladů $AC$. Platí tu $P=MC=AC$ a v dlouhodobé rovnováze odvětví $P=LMC=\\min LAC$. Minimum krátkodobých $AC$ se rovná minimu $LAC$ jen při optimální velikosti provozu. Firma má nulový ekonomický zisk a získává jen normální zisk: výnos, který pokrývá alternativní náklady podnikatele.',
     tex: 'P=MR=MC=AC',
     viz: demoGraph({ curves: [priceLine(76, 'P')], points: [{ x: 6, y: 76, label: 'R', guides: true }], alt: 'Bod vyrovnání v minimu AC' }),
     mistakes: ['Nulový ekonomický zisk neznamená, že firma nic nevydělá. Normální zisk je v nákladech započítaný.'] },
   { heading: 'Křivka nabídky firmy', term: 'Křivka nabídky firmy',
-    text: 'Při každé ceně firma vyrábí tam, kde $P=MC$. Proto je nabídkou firmy křivka mezních nákladů, ale jen její rostoucí část nad bodem uzavření:\n\n• v krátkém období je nabídkou firmy rostoucí část $MC$ nad minimem $AVC$,\n• v dlouhém období je nabídkou firmy rostoucí část $MC$ nad minimem $AC$.',
+    text: 'Při každé ceně firma vyrábí tam, kde $P=MC$. Proto je nabídkou firmy křivka mezních nákladů, ale jen její rostoucí část nad minimem příslušných průměrných nákladů. Krátké a dlouhé období se přitom liší:\n\n• v krátkém období je nabídkou firmy rostoucí část krátkodobých mezních nákladů $MC$ nad minimem $AVC$,\n• v dlouhém období neexistují fixní náklady, $AFC$ ani $AVC$. Nabídkou firmy je rostoucí část dlouhodobých mezních nákladů $LMC$ nad minimem dlouhodobých průměrných nákladů $LAC$.',
     viz: demoGraph({ curves: [{ expr: DEMO.mcE, domain: [3, 8], label: 'S', color: 'accent' }], points: [{ x: 3, y: 31, label: 'U', guides: true }], alt: 'Křivka nabídky firmy jako část MC' }),
     mistakes: ['Celá křivka $MC$ není nabídkou firmy. Pod cenou odpovídající minimu $AVC$ firma nevyrábí nic.'] },
   { heading: 'Nabídka odvětví a krátkodobá rovnováha', term: 'Nabídka odvětví',
-    text: 'Nabídka odvětví vznikne horizontálním součtem nabídek všech firem: při každé ceně sečteme množství, která jednotlivé firmy nabídnou. Sčítá se množství, nikoli cena. Poptávka odvětví je naopak součtem poptávek kupujících.\n\nV krátkém období je odvětví v rovnováze, když se poptávané množství rovná nabízenému. V tržní rovnováze pak platí, že mezní užitek kupujících se rovná mezním nákladům firem: $MU=MC$.',
+    text: 'Nabídka odvětví vznikne horizontálním součtem nabídek všech firem: při každé ceně sečteme množství, která jednotlivé firmy nabídnou. Sčítá se množství, nikoli cena. Poptávka odvětví je naopak součtem poptávek kupujících.\n\nV krátkém období je odvětví v rovnováze, když se poptávané množství rovná nabízenému. V tržní rovnováze pak platí, že mezní ochota kupujících platit (cena) se rovná mezním nákladům firem: $P=MC$.',
     viz: view([{ expr: '10 + 2*x', label: 'S1', color: 'green' }, { expr: '10 + 4*x', label: 'S2', color: 'blue' }, { expr: '10 + 4*x/3', label: 'S', color: 'accent' }], { domain: [0, 10], range: [0, 50] }),
     mistakes: ['Individuální nabídky se sčítají vodorovně (množství při stejné ceně), ne svisle.', 'Prostý součet platí při neměnných cenách vstupů a v krátkém období, kdy se nemění počet firem.'] },
   { heading: 'Rovnováha odvětví v dlouhém období', term: 'Dlouhodobá rovnováha odvětví',

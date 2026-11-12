@@ -736,8 +736,8 @@ function genTrzbyMax(rng) {
 }
 
 // ---------- typ: důchodová elasticita (hodnota) ----------
-const classifyEI = (E) => (E < 0 ? 'podradny' : E < 1 ? 'normalni-nezbytny' : 'normalni-luxusni');
-const EI_NAMES = { podradny: 'podřadný statek (E je záporná)', 'normalni-nezbytny': 'normální statek denní potřeby (0 < E < 1)', 'normalni-luxusni': 'normální luxusní statek (E > 1)' };
+const classifyEI = (E) => (E < 0 ? 'podradny' : E <= 1 ? 'normalni-nezbytny' : 'normalni-luxusni');
+const EI_NAMES = { podradny: 'podřadný statek (E je záporná)', 'normalni-nezbytny': 'normální statek denní potřeby (0 ≤ E ≤ 1)', 'normalni-luxusni': 'normální luxusní statek (E > 1)' };
 const EI_OPTIONS = Object.entries(EI_NAMES).map(([id, text]) => ({ id, text: text[0].toUpperCase() + text.slice(1) }));
 
 function eiSteps(d, E, askValue) {
