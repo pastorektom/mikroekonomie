@@ -58,3 +58,7 @@ test('názvy a poznámky nemají podtržítko mimo vzorec ($…$)', () => {
     for (const text of [f.name, f.note || '']) assert.ok(!/_/.test(outside(text)), `${f.group}: „${text}“ má „_“ mimo vzorec`);
   }
 });
+
+test('přehled vzorců pokrývá všech 11 témat', () => {
+  assert.deepEqual(FORMULAS.map((g) => g.topic), topics.map((t) => t.id));
+});

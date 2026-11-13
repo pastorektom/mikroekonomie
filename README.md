@@ -2,6 +2,8 @@
 
 Webová aplikace pro přípravu na zápočtový test a zkoušku z Mikroekonomie 1 (FaME UTB): výklad, procvičování s kontrolou výsledků, ekonomické grafy, kreslicí tabule, postup krok za krokem, test nanečisto a přehled vzorců. Funguje na počítači, Androidu, iPhonu i tabletu. Vše je česky.
 
+**Nasazený web:** <https://pastorektom.github.io/mikroekonomie/> (přihlášení jen pro e-maily z tabulky `allowed_emails` v Supabase). Aktualizace webu se dělá odesláním změn na GitHub (větev `main`), nasazení proběhne samo.
+
 ## Spuštění u sebe
 
 1. Ve složce projektu dvakrát klikni na **Spustit_aplikaci.bat**.
@@ -12,7 +14,10 @@ Testy (v PowerShellu ve složce projektu): `npm test`
 
 ## Nasazení pro spolužáky (krok za krokem)
 
-Postup je podobný jako u aplikace Matika. Nasazení je vnější akce: nic se nezveřejní, dokud to sám neprovedeš.
+Tento postup je už provedený. Zůstává tu jako návod, kdyby se mělo nasadit znovu nebo jinde.
+
+### Přidání dalšího kamaráda
+V Supabase v **SQL Editor** spusť (e-mail malými písmeny): `insert into public.allowed_emails (email) values ('jmeno@example.com') on conflict do nothing;`
 
 ### 1. Databáze Supabase (přihlášení a pokrok)
 Postupuj podle **docs\supabase-navod.md**. Založ **nový** projekt, spusť `supabase\schema.sql`, přidej e-maily spolužáků do seznamu povolených a opiš **Project URL** a klíč **anon public** do souboru `js\config.js`. Klíč `service_role` ani heslo k databázi nikam nevkládej.

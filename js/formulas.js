@@ -3,6 +3,14 @@
 export const DISCLAIMER = 'Vlastní přehled pro učení. Je neoficiální a nenahrazuje list vzorců, který případně povolí vyučující.';
 
 export const FORMULAS = [
+  { topic: 'uvod', items: [
+    { name: 'Oportunitní náklad', tex: 'OC_X=\\frac{\\Delta Y}{\\Delta X}', note: 'Kolik jednotek $Y$ se vzdáme za jednu další jednotku $X$. Je to sklon hranice produkčních možností.' },
+    { name: 'Ekonomické (úplné) náklady', tex: '\\text{explicitní}+\\text{implicitní náklady}', note: 'Oportunitní náklad alternativy je hodnota nejlepší vzdané možnosti.' },
+    { name: 'Ekonomický zisk', tex: '\\pi_{ek}=TR-\\text{explicitní}-\\text{implicitní náklady}' },
+    { name: 'Sklon přímky', tex: 'k=\\frac{\\Delta y}{\\Delta x}' },
+    { name: 'Mezní veličina', tex: 'M=\\frac{\\Delta T}{\\Delta Q}', note: 'Přírůstek celkové veličiny $T$ při zvýšení množství o jednotku.' },
+    { name: 'Průměrná veličina', tex: 'A=\\frac{T}{Q}', note: 'Je-li mezní hodnota větší než průměr, průměr roste. Je-li menší, průměr klesá.' },
+  ] },
   { topic: 'trh', items: [
     { name: 'Lineární poptávka a nabídka', tex: 'Q_D=a-bP,\\qquad Q_S=c+dP', note: 'b a d jsou kladná čísla.' },
     { name: 'Rovnovážná cena', tex: 'P_E=\\frac{a-c}{b+d}', note: 'Z podmínky $Q_D=Q_S$.' },
@@ -58,5 +66,51 @@ export const FORMULAS = [
     { name: 'Mrtvá ztráta monopolu', tex: 'DWL=\\tfrac{1}{2}\\,(P_M-MC)(Q_C-Q_M)', note: 'U lineární poptávky a konstantního MC.' },
     { name: 'Dokonalá konkurence: srovnání', tex: 'P_C=MC,\\quad Q_C>Q_M,\\quad P_C<P_M' },
     { name: 'Monopolistická konkurence v dlouhém období', tex: 'P=AC,\\quad MR=MC', note: 'Poptávka se dotýká AC, ekonomický zisk je nulový.' },
+  ] },
+  { topic: 'faktory', items: [
+    { name: 'Příjem z mezního produktu', tex: 'MRP=MR\\cdot MP', note: 'MR je mezní příjem z produktu, MP mezní produkt faktoru.' },
+    { name: 'Hodnota mezního produktu', tex: 'VMP=P\\cdot MP', note: 'Totéž co MRP při dokonalé konkurenci na trhu produktu.' },
+    { name: 'Mezní náklad na faktor', tex: 'MFC=\\frac{\\Delta TFC}{\\Delta L}', note: 'Při dokonalé konkurenci na trhu faktoru je $MFC=w$.' },
+    { name: 'Optimální množství faktoru', tex: 'MRP=MFC', note: 'MRP protíná MFC shora. Firma navíc musí pokrýt variabilní náklady: $MRP \\le ARP$.' },
+    { name: 'Příjem z průměrného produktu', tex: 'ARP=P\\cdot AP,\\qquad AP=\\frac{Q}{L}' },
+    { name: 'Optimální kombinace faktorů', tex: '\\frac{MP_A}{P_A}=\\frac{MP_B}{P_B}', note: 'Poslední koruna vložená do každého faktoru dává stejný přírůstek produkce.' },
+    { name: 'Ekonomická renta', tex: '\\text{renta}=\\text{platba}-\\text{transferový výdělek}' },
+    { name: 'Monopsonie', tex: 'MFC>w', note: 'Nákup dalšího kusu faktoru zdraží všechny dosavadní kusy.' },
+  ] },
+  { topic: 'prace', items: [
+    { name: 'Poptávka firmy po práci', tex: 'MRP_L=MR\\cdot MP_L', note: 'Poptávkou je část klesající MRP pod křivkou $ARP$.' },
+    { name: 'Optimum firmy na trhu práce', tex: 'MRP_L=w', note: 'Při dokonalé konkurenci na trhu práce.' },
+    { name: 'Rovnováha na trhu práce', tex: 'L_D(w_E)=L_S(w_E)' },
+    { name: 'Celková mzda', tex: 'W=w\\cdot L' },
+    { name: 'Nezaměstnanost při minimální mzdě', tex: 'U=L_S(w_{min})-L_D(w_{min})', note: 'Minimální mzda působí jen nad rovnovážnou mzdou.' },
+    { name: 'Monopsonie na trhu práce', tex: 'MRP_L=MFC_L', note: 'Mzda se bere z křivky nabídky práce při optimálním množství.' },
+    { name: 'Mezní náklad na práci při monopsonii', tex: 'MFC_L=w+L\\cdot\\frac{\\Delta w}{\\Delta L}', note: 'Je větší než mzda $w$.' },
+    { name: 'Renta pracovníků', tex: '\\text{renta}=\\text{mzda}-\\text{transferový výdělek}' },
+  ] },
+  { topic: 'kapital', items: [
+    { name: 'Současná hodnota', tex: 'PV=\\frac{FV}{(1+i)^n}' },
+    { name: 'Budoucí hodnota (složené úročení)', tex: 'FV=PV\\,(1+i)^n' },
+    { name: 'Čistá současná hodnota', tex: 'NPV=-I+\\sum_{t=1}^{n}\\frac{CF_t}{(1+i)^t}', note: 'Projekt se vyplatí při $NPV>0$.' },
+    { name: 'Vnitřní výnosové procento', tex: 'NPV(IRR)=0', note: 'Projekt se vyplatí, když $IRR$ je větší než úroková míra.' },
+    { name: 'Reálná úroková míra', tex: '1+r=\\frac{1+i}{1+\\pi},\\qquad r\\approx i-\\pi', note: '$i$ je nominální míra, $\\pi$ míra inflace.' },
+    { name: 'Cena aktiva s trvalým příjmem', tex: 'P=\\frac{R}{i}' },
+    { name: 'Giniho koeficient', tex: 'G=\\frac{A-B}{A}', note: '$A$ je plocha pod přímkou rovnosti, $B$ pod Lorenzovou křivkou. Hodnota 0 je úplná rovnost.' },
+  ] },
+  { topic: 'rovnovaha', items: [
+    { name: 'Přebytek spotřebitele a výrobce', tex: 'CS=\\int_{P}^{P_{max}}Q_D\\,dp,\\qquad PS=\\int_{P_{min}}^{P}Q_S\\,dp' },
+    { name: 'Celkový společenský přebytek', tex: 'TS=CS+PS', note: 'V dílčí analýze bez důchodových efektů je v rovnováze největší.' },
+    { name: 'Mrtvá ztráta (lineární křivky)', tex: 'DWL=\\tfrac{1}{2}\\,\\Delta P\\cdot\\Delta Q', note: 'Plocha trojúhelníku mezi křivkami D a S nad rozdílem skutečného a efektivního množství.' },
+    { name: 'Výnos daně z kusu', tex: 'T_{výnos}=t\\cdot Q_t' },
+    { name: 'Paretova efektivnost výměny', tex: 'MRS_A=MRS_B', note: 'Smluvní křivka. Nic neříká o spravedlnosti rozdělení.' },
+    { name: 'Efektivnost výroby a spotřeby', tex: 'MRPT=\\frac{MC_X}{MC_Y}=MRS' },
+  ] },
+  { topic: 'selhani', items: [
+    { name: 'Společenské mezní náklady', tex: 'MSC=MPC+MEC', note: 'Negativní externalita: $MSC$ leží nad $MPC$.' },
+    { name: 'Společenský mezní prospěch', tex: 'MSB=MPB+MEB', note: 'Pozitivní externalita: $MSB$ leží nad $MPB$.' },
+    { name: 'Společensky optimální množství', tex: 'MSB=MSC' },
+    { name: 'Tržní množství', tex: 'MPB=MPC', note: 'Při negativní externalitě je větší než optimum (nadprodukce).' },
+    { name: 'Pigouova daň', tex: 't=MEC(Q^{*})', note: 'Rovná se externímu meznímu nákladu při optimálním množství.' },
+    { name: 'Dotace při pozitivní externalitě', tex: 's=MEB(Q^{*})' },
+    { name: 'Veřejný statek', tex: 'MSB=\\sum_i MB_i', note: 'Křivky poptávky se sčítají svisle (ochota platit se sčítá).' },
   ] },
 ];
