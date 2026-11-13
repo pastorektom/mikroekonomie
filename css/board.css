@@ -46,8 +46,8 @@
 .board .katex .bt-vysledek {
   background: linear-gradient(transparent 52%, var(--marker) 52%, var(--marker) 94%, transparent 94%);
   padding: 0 0.2em; border-radius: 3px;
+  color: var(--result-text, inherit);
 }
-@media (prefers-color-scheme: dark) { .board .katex .bt-vysledek { color: #f4f6ff; } }
 
 .board-sr {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;

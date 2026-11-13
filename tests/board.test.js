@@ -301,12 +301,19 @@ function tokens(block) {
 }
 const appCss = readFileSync(new URL('../css/app.css', import.meta.url), 'utf8');
 const lightRoot = appCss.slice(appCss.indexOf(':root {'), appCss.indexOf('}', appCss.indexOf(':root {')));
-const darkStart = appCss.indexOf('@media (prefers-color-scheme: dark)');
-const darkRoot = appCss.slice(appCss.indexOf(':root {', darkStart), appCss.indexOf('}', appCss.indexOf(':root {', darkStart)));
+// Tmavé barvy jsou dvakrát: podle systému (@media, pokud uživatel nevynutil světlý) a ručně zvolený tmavý režim.
+// Oba bloky musí mít stejné hodnoty, OLED je odvozený od tmavého.
+const block = (sel) => {
+  const i = appCss.indexOf(sel);
+  assert.ok(i >= 0, `v app.css chybí ${sel}`);
+  return appCss.slice(appCss.indexOf('{', i), appCss.indexOf('}', i));
+};
 const LIGHT = tokens(lightRoot);
-const DARK = { ...LIGHT, ...tokens(darkRoot) };
+const DARK = { ...LIGHT, ...tokens(block(':root[data-theme="dark"]')) };
+const OLED = { ...DARK, ...tokens(block(':root[data-theme="oled"]')) };
+const DARK_SYSTEM = { ...LIGHT, ...tokens(block(':root:not([data-theme="light"]):not([data-theme="dark"]):not([data-theme="oled"])')) };
 
-for (const [name, T] of [['světlý', LIGHT], ['tmavý', DARK]]) {
+for (const [name, T] of [['světlý', LIGHT], ['tmavý', DARK], ['OLED', OLED]]) {
   test(`kontrast textových barev v ${name} režimu je ≥ 4,5 : 1 na ploše i na papíru`, () => {
     for (const fg of ['--ink', '--ink-soft', '--d', '--s-text', '--good', '--bad']) {
       for (const bg of ['--surface', '--paper']) {
@@ -320,6 +327,7 @@ for (const [name, T] of [['světlý', LIGHT], ['tmavý', DARK]]) {
 test('text na zvýrazňovači (#10131a na --marker) má kontrast ≥ 7 : 1', () => {
   assert.ok(contrast('#10131a', LIGHT['--marker']) >= 7);
   assert.ok(contrast('#10131a', DARK['--marker']) >= 7);
+  assert.ok(contrast('#10131a', OLED['--marker']) >= 7);
 });
 
 test('modrá (poptávka) a korálová (nabídka) jsou na ploše odlišitelné i pro barvoslepé: liší se světlostí', () => {
@@ -339,4 +347,13 @@ test('css/board.css nepřepisuje font-family vzorců, symboly zůstávají z pí
 test('css/board.css je uložen bez BOM', () => {
   const buf = readFileSync(new URL('../css/board.css', import.meta.url));
   assert.notDeepEqual([...buf.subarray(0, 3)], [0xef, 0xbb, 0xbf]);
+});
+
+test('tmavý režim podle systému má stejné barvy jako ručně zvolený tmavý', () => {
+  assert.deepEqual(DARK_SYSTEM, DARK);
+});
+
+test('OLED má čistě černé pozadí a o něco světlejší plochy', () => {
+  assert.equal(OLED['--paper'], '#000000');
+  assert.ok(lum(OLED['--surface']) > 0 && lum(OLED['--surface']) < 0.01);
 });

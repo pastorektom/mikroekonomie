@@ -20,6 +20,7 @@ import { mountPractice, buildFixedProblem, FIXED_TYPE, FIXED_TITLE } from './ui/
 import { renderLogin, renderNewPassword } from './ui/login.js';
 import { mountExam } from './ui/exam.js';
 import { EXAMS } from './exam.js';
+import { THEME_LABELS, nextTheme, applyTheme, loadTheme, saveTheme } from './theme.js';
 
 const doc = document;
 const $ = (sel) => doc.querySelector(sel);
@@ -447,7 +448,38 @@ async function setupAccount() {
   }
 }
 
+// Přepínač vzhledu: podle systému, světlý, tmavý, OLED. Jedno tlačítko, které se po kliknutí přepne na další.
+function mountThemeToggle() {
+  const slot = $('#theme-slot');
+  if (!slot) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  let theme = loadTheme(window.localStorage);
+  const icon = doc.createElementNS(NS, 'svg');
+  icon.setAttribute('viewBox', '0 0 24 24');
+  icon.setAttribute('aria-hidden', 'true');
+  const path = doc.createElementNS(NS, 'path');
+  path.setAttribute('d', 'M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z');
+  icon.appendChild(path);
+  const name = h(doc, 'span', { class: 'theme-name' });
+  const btn = h(doc, 'button', { type: 'button', class: 'theme-toggle' }, [icon, name]);
+  const sync = () => {
+    name.textContent = `Vzhled: ${THEME_LABELS[theme]}`;
+    btn.setAttribute('aria-label', `Vzhled: ${THEME_LABELS[theme]}. Klikni pro další.`);
+    btn.title = `Vzhled: ${THEME_LABELS[theme]}`;
+  };
+  btn.addEventListener('click', () => {
+    theme = nextTheme(theme);
+    applyTheme(doc, theme);
+    saveTheme(window.localStorage, theme);
+    sync();
+  });
+  applyTheme(doc, theme);
+  sync();
+  slot.appendChild(btn);
+}
+
 async function start() {
+  mountThemeToggle();
   try {
     const katex = await import('katex');
     setTexEngine(katex.default || katex);

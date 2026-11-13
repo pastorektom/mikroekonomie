@@ -40,8 +40,11 @@
   --nav-on-fg: #10131a;
 }
 
+/* Tmavý vzhled: podle systému (když uživatel nevolil ručně) a ručně zvolený tmavý nebo OLED. Bloky musí mít
+   stejné hodnoty (hlídá tests/board.test.js). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]):not([data-theme="dark"]):not([data-theme="oled"]) {
+    color-scheme: dark;
     --paper: #0d0f15;
     --surface: #171a23;
     --surface-2: #1d212c;
@@ -59,7 +62,56 @@
     --nav-fg: #10131a;
     --nav-on-bg: #10131a;
     --nav-on-fg: #e7f55c;
+    --result-text: #f4f6ff;
   }
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0d0f15;
+  --surface: #171a23;
+  --surface-2: #1d212c;
+  --ink: #eef0f6;
+  --ink-soft: #a2a9bb;
+  --line: rgba(238, 240, 246, 0.14);
+  --d: #8d9cff;
+  --s: #ff7a67;
+  --s-text: #ff8f7f;
+  --marker: #dcef4f;
+  --focus: #a5b1ff;
+  --good: #72d89e;
+  --bad: #ff8f7f;
+  --nav-bg: #eef0f6;
+  --nav-fg: #10131a;
+  --nav-on-bg: #10131a;
+  --nav-on-fg: #e7f55c;
+  --result-text: #f4f6ff;
+}
+/* OLED: čistě černé pozadí (vypnuté pixely), plochy o stupeň světlejší, aby šly rozeznat */
+:root[data-theme="oled"] {
+  color-scheme: dark;
+  --paper: #0d0f15;
+  --surface: #171a23;
+  --surface-2: #1d212c;
+  --ink: #eef0f6;
+  --ink-soft: #a2a9bb;
+  --line: rgba(238, 240, 246, 0.14);
+  --d: #8d9cff;
+  --s: #ff7a67;
+  --s-text: #ff8f7f;
+  --marker: #dcef4f;
+  --focus: #a5b1ff;
+  --good: #72d89e;
+  --bad: #ff8f7f;
+  --nav-bg: #eef0f6;
+  --nav-fg: #10131a;
+  --nav-on-bg: #10131a;
+  --nav-on-fg: #e7f55c;
+  --result-text: #f4f6ff;
+  --paper: #000000;
+  --surface: #0b0b0e;
+  --surface-2: #141418;
+  --line: rgba(238, 240, 246, 0.18);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -488,3 +540,15 @@ body[data-auth="login"] .shell { display: block; }
 .link-btn { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; text-decoration-color: var(--line); }
 .link-btn:hover { text-decoration-color: var(--ink); }
 .auth-card .field input { font-size: 1.05rem; }
+
+/* ---------- přepínač vzhledu ---------- */
+.theme-slot { margin-left: auto; }
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px;
+  font: inherit; font-size: var(--step--1); font-weight: 600; color: var(--ink);
+  background: var(--surface); border: 1.5px solid transparent; border-radius: 999px; cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--line); }
+.theme-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 899px) { .theme-toggle .theme-name { display: none; } .theme-toggle { padding: 0 12px; } }
+@media (min-width: 900px) { .theme-slot { margin: 8px 0 0; padding: 0 10px; } }
