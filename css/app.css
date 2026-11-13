@@ -481,3 +481,10 @@ body[data-auth="login"] .shell { display: block; }
 .recommend a { color: inherit; }
 .recent-exams { margin-top: 28px; }
 .recent-exams p { margin: 4px 0; }
+
+/* přihlášení: nadpis se vejde do karty, odkazy bez výchozí modré */
+.auth-card .page-title { font-size: clamp(1.7rem, 7vw, 2.3rem); margin-top: 0; }
+.auth-card .lede { font-size: var(--step-0); margin-bottom: 1.1em; }
+.link-btn { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; text-decoration-color: var(--line); }
+.link-btn:hover { text-decoration-color: var(--ink); }
+.auth-card .field input { font-size: 1.05rem; }
