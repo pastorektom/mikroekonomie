@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Z content/problems/*.json vypíše SQL, které vloží pevné příklady do tabulky public.problems
 // (topic, type, ord, payload). Výstup zkopírujte do Supabase: SQL Editor -> New query -> Run.
-// Opakované spuštění nic nezdvojí (on conflict do nothing).
+// Opakované spuštění nic nezdvojí: staré příklady se nejdřív smažou a vloží se znovu (vše v jedné transakci).
 //
 // Použití (z kořene projektu):  node tools/problems-to-sql.mjs > problems.sql
 //   - topic = název souboru bez .json, ord = pořadí v souboru (od 1),
@@ -18,6 +18,9 @@ export const sqlString = (s) => `'${String(s).replace(/'/g, "''")}'`;
 
 export function toSql(files) {
   const lines = ['-- Pevné příklady ze cvičení. Vygenerováno: node tools/problems-to-sql.mjs', 'begin;'];
+  // Pořadí (ord) se mění, když přibudou úlohy uprostřed seznamu, proto se staré příklady nejdřív smažou a vloží se znovu.
+  // Tabulka problems obsahuje jen tyto příklady, nic jiného se tím nemaže.
+  if (files.some((f) => f.problems.length > 0)) lines.push('delete from public.problems;');
   for (const { topic, problems } of files) {
     problems.forEach((p, i) => {
       const type = typeof p.type === 'string' && p.type ? p.type : 'cviceni';
