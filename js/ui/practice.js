@@ -185,10 +185,12 @@ export function mountPractice(el, topic, opts = {}) {
       ? `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${sourceText(problem.source) ? `, ${sourceText(problem.source)}` : ''}`
       : type?.title || '';
     prompt.appendChild(h(doc, 'p', { class: 'prompt-label', text: labelText }));
-    const f = h(doc, 'div', { class: 'formula' });
-    renderTex(f, problem.promptTex, { display: true });
     if (problem.task) prompt.appendChild(renderText(h(doc, 'div', { class: 'prompt-task prose', 'data-role': 'task' }), problem.task));
-    prompt.appendChild(f);
+    if (problem.promptTex && problem.promptTex.trim() !== '\,') {
+      const f = h(doc, 'div', { class: 'formula' });
+      renderTex(f, problem.promptTex, { display: true });
+      prompt.appendChild(f);
+    }
     // problem.promptViz = { kind, data }: graf k zadání (např. „Limity z grafu“) pod vzorcem v rámu tabule
     if (problem.promptViz) {
       const pv = h(doc, 'div', { class: 'prompt-viz', 'data-role': 'prompt-viz' });
@@ -332,7 +334,7 @@ export function mountPractice(el, topic, opts = {}) {
 
   // Pevné příklady se načítají asynchronně; volba „Příklady ze cvičebnice“ se přidá, jen když nějaké jsou.
   function setFixed(list) {
-    fixed = Array.isArray(list) ? list.filter((p) => p && p.promptTex && p.answerSpec) : [];
+    fixed = Array.isArray(list) ? list.filter((p) => p && (p.promptTex || p.task) && p.answerSpec) : [];
     picker?.querySelector('[data-role="type-cviceni"]')?.remove();
     if (!fixed.length) return;
     if (!picker) {

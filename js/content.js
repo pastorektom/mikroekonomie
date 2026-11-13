@@ -2,7 +2,7 @@
 // (tabulka problems, čitelná jen přihlášeným z allowed_emails), při vývoji bez konfigurace
 // se čtou z content/problems/<téma>.json (složka je v .gitignore).
 //
-// Uložený tvar: { id, type, data?, promptTex, answerSpec, answerTex?, hint?, solution?, source }.
+// Uložený tvar: { id, type, data?, promptTex nebo task, answerSpec, answerTex?, hint?, solution?, source }.
 // Má-li příklad data a jeho typ v tématu funkci solve(data), postup (a chybějící pole)
 // se sestaví stejným kódem jako u náhodných příkladů.
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
@@ -25,7 +25,7 @@ export function hydrateProblems(topic, list) {
       }
     }
     const p = { ...built, ...raw, topic: topic.id, solution: raw.solution ?? built.solution ?? [] };
-    if (!p.promptTex || !p.answerSpec) continue;
+    if (!p.answerSpec || !(p.promptTex || p.task)) continue; // zadání je vzorec, nebo text (pravda/nepravda, výběr)
     out.push(p);
   }
   return out;
