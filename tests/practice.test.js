@@ -278,3 +278,24 @@ test('whiteboard: po „Ukaž výsledek“ se vedle tabule nakreslí vzorový gr
   click('reveal');
   assert.ok(q('[data-role="reveal-box"] .viz-board svg path'), 'vzor v rámu tabule');
 });
+
+test('sourceText: zdroj z cvičebnice se zobrazí česky, ne jako objekt', async () => {
+  const { sourceText } = await import('../js/ui/practice.js');
+  assert.equal(sourceText({ chapter: 3, number: 15 }), 'cvičebnice, kap. 3, úloha 15');
+  assert.equal(sourceText({ chapter: 6, number: 'C-d' }), 'cvičebnice, kap. 6, úloha C-d');
+  assert.equal(sourceText('kap. 2'), 'kap. 2');
+  assert.equal(sourceText(undefined), '');
+  assert.equal(sourceText({}), '');
+  assert.equal(sourceText({ chapter: 7.1, number: 3 }), 'cvičebnice, kap. 7.1, úloha 3');
+});
+
+test('fixní příklady: popisek ukáže zdroj v čitelném tvaru', () => {
+  const t = { id: 't', title: 'T', order: 1, theory: [], types: [{ id: 'a', title: 'A', generate: () => ({ id: 'a', topic: 't', type: 'a', seed: 0, promptTex: '1', answerSpec: { kind: 'number', value: 1 }, solution: [] }) }] };
+  const { window } = new JSDOM('<!doctype html><div id="r"></div>');
+  const el = window.document.getElementById('r');
+  const p = mountPractice(el, t, { record: () => Promise.resolve({}), navigate: () => {} });
+  p.setFixed([{ id: 'cv-3-1', type: 'a', promptTex: '1', answerSpec: { kind: 'number', value: 1 }, solution: [], source: { chapter: 3, number: 1 } }]);
+  el.querySelector('[data-role="type-cviceni"]').click();
+  assert.match(el.querySelector('.prompt-label').textContent, /cvičebnice, kap\. 3, úloha 1/);
+  assert.doesNotMatch(el.querySelector('.prompt-label').textContent, /object/i);
+});

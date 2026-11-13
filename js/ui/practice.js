@@ -45,7 +45,16 @@ export function formatAnswer(problem) {
 
 // Pevné příklady ze cvičení (js/content.js) mají typ 'cviceni' a „seed“ = pořadí v seznamu.
 export const FIXED_TYPE = 'cviceni';
-export const FIXED_TITLE = 'Příklady ze cvičení';
+export const FIXED_TITLE = 'Příklady ze cvičebnice';
+
+// Zdroj příkladu: { chapter, number } z cvičebnice nebo hotový text.
+export function sourceText(src) {
+  if (typeof src === 'string') return src;
+  if (src && typeof src === 'object' && src.chapter != null && src.number != null) {
+    return `cvičebnice, kap. ${src.chapter}, úloha ${src.number}`;
+  }
+  return '';
+}
 
 export function buildFixedProblem(topic, list, index) {
   const i = ((index % list.length) + list.length) % list.length;
@@ -173,7 +182,7 @@ export function mountPractice(el, topic, opts = {}) {
     prompt.textContent = '';
     const type = types.find((t) => t.id === problem.type);
     const labelText = problem.type === FIXED_TYPE
-      ? `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${problem.source ? ` · ${problem.source}` : ''}`
+      ? `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${sourceText(problem.source) ? `, ${sourceText(problem.source)}` : ''}`
       : type?.title || '';
     prompt.appendChild(h(doc, 'p', { class: 'prompt-label', text: labelText }));
     const f = h(doc, 'div', { class: 'formula' });
@@ -321,7 +330,7 @@ export function mountPractice(el, topic, opts = {}) {
 
   newProblem();
 
-  // Pevné příklady se načítají asynchronně; volba „Příklady ze cvičení“ se přidá, jen když nějaké jsou.
+  // Pevné příklady se načítají asynchronně; volba „Příklady ze cvičebnice“ se přidá, jen když nějaké jsou.
   function setFixed(list) {
     fixed = Array.isArray(list) ? list.filter((p) => p && p.promptTex && p.answerSpec) : [];
     picker?.querySelector('[data-role="type-cviceni"]')?.remove();

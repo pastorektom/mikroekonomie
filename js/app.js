@@ -16,7 +16,7 @@ import { initAuth, currentUser, signOut, onAuthEvent } from './auth.js';
 import { initProgress, setProgressUser, flushQueue, topicStats, recommendNext, listExams } from './progress.js';
 import { renderFormulas } from './ui/formulas.js';
 import { initContent, loadFixedProblems } from './content.js';
-import { mountPractice, buildFixedProblem, FIXED_TYPE, FIXED_TITLE } from './ui/practice.js';
+import { mountPractice, buildFixedProblem, sourceText, FIXED_TYPE, FIXED_TITLE } from './ui/practice.js';
 import { renderLogin, renderNewPassword } from './ui/login.js';
 import { mountExam } from './ui/exam.js';
 import { EXAMS } from './exam.js';
@@ -287,7 +287,7 @@ function viewPostup(body, topic, query = {}) {
       if (fixedMode) {
         if (!fixed.length) { prompt.textContent = 'Načítám příklady ze cvičebnice…'; stepperEl.textContent = ''; mark(); return; }
         problem = buildFixedProblem(topic, fixed, fixedIndex);
-        label = `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${problem.source ? ` · ${problem.source}` : ''}`;
+        label = `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${sourceText(problem.source) ? `, ${sourceText(problem.source)}` : ''}`;
       } else {
         const seed = fixedSeed ?? randomSeed();
         fixedSeed = null;
