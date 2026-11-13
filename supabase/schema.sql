@@ -127,3 +127,11 @@ create policy problems_select_allowed on public.problems
 
 -- Přidání e-mailu (příklad, nahraďte vlastním a spusťte zvlášť):
 --   insert into public.allowed_emails (email) values ('jmeno@example.com') on conflict do nothing;
+
+-- 5) Oprávnění pro Data API. Nové tabulky se v Supabase nemusí zpřístupnit samy, proto je přidělujeme výslovně.
+--    Co smí kdo číst a zapisovat, dál hlídá řádková ochrana (RLS) výše. Přihlášený uživatel smí jen své řádky,
+--    problems čte jen povolený e-mail, allowed_emails se z prohlížeče nečte vůbec (bez oprávnění).
+grant usage on schema public to anon, authenticated;
+grant select, insert on public.attempts to authenticated;
+grant select, insert on public.exam_runs to authenticated;
+grant select on public.problems to authenticated;
