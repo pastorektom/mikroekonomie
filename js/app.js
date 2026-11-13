@@ -287,7 +287,7 @@ function viewPostup(body, topic, query = {}) {
       if (fixedMode) {
         if (!fixed.length) { prompt.textContent = 'Načítám příklady ze cvičebnice…'; stepperEl.textContent = ''; mark(); return; }
         problem = buildFixedProblem(topic, fixed, fixedIndex);
-        label = `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${sourceText(problem.source) ? `, ${sourceText(problem.source)}` : ''}`;
+        label = `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${sourceText(problem.source, problem.id) ? `, ${sourceText(problem.source, problem.id)}` : ''}`;
       } else {
         const seed = fixedSeed ?? randomSeed();
         fixedSeed = null;

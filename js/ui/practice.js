@@ -48,10 +48,14 @@ export const FIXED_TYPE = 'cviceni';
 export const FIXED_TITLE = 'Příklady ze cvičebnice';
 
 // Zdroj příkladu: { chapter, number } z cvičebnice nebo hotový text.
-export function sourceText(src) {
+export function sourceText(src, id) {
   if (typeof src === 'string') return src;
   if (src && typeof src === 'object' && src.chapter != null && src.number != null) {
-    return `cvičebnice, kap. ${src.chapter}, úloha ${src.number}`;
+    const base = `cvičebnice, kap. ${src.chapter}, úloha ${src.number}`;
+    // id ve tvaru cv-<kapitola>-<číslo>-<podúloha…> → „část <podúloha>“
+    const prefix = `cv-${src.chapter}-${src.number}-`;
+    const part = typeof id === 'string' && id.startsWith(prefix) ? id.slice(prefix.length).replace(/-/g, ' ') : '';
+    return part ? `${base}, část ${part}` : base;
   }
   return '';
 }
@@ -182,7 +186,7 @@ export function mountPractice(el, topic, opts = {}) {
     prompt.textContent = '';
     const type = types.find((t) => t.id === problem.type);
     const labelText = problem.type === FIXED_TYPE
-      ? `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${sourceText(problem.source) ? `, ${sourceText(problem.source)}` : ''}`
+      ? `${FIXED_TITLE}: ${problem.seed + 1} z ${fixed.length}${sourceText(problem.source, problem.id) ? `, ${sourceText(problem.source, problem.id)}` : ''}`
       : type?.title || '';
     prompt.appendChild(h(doc, 'p', { class: 'prompt-label', text: labelText }));
     if (problem.task) prompt.appendChild(renderText(h(doc, 'div', { class: 'prompt-task prose', 'data-role': 'task' }), problem.task));

@@ -299,3 +299,12 @@ test('fixní příklady: popisek ukáže zdroj v čitelném tvaru', () => {
   assert.match(el.querySelector('.prompt-label').textContent, /cvičebnice, kap\. 3, úloha 1/);
   assert.doesNotMatch(el.querySelector('.prompt-label').textContent, /object/i);
 });
+
+test('sourceText s id: podúloha se ukáže jako „část a“', async () => {
+  const { sourceText } = await import('../js/ui/practice.js');
+  assert.equal(sourceText({ chapter: 3, number: 1 }, 'cv-3-1-a'), 'cvičebnice, kap. 3, úloha 1, část a');
+  assert.equal(sourceText({ chapter: 4, number: 13 }, 'cv-4-13-c-3'), 'cvičebnice, kap. 4, úloha 13, část c 3');
+  assert.equal(sourceText({ chapter: 3, number: 'C-a' }, 'cv-3-C-a'), 'cvičebnice, kap. 3, úloha C-a');
+  assert.equal(sourceText({ chapter: 3, number: 15 }, 'cv-3-15'), 'cvičebnice, kap. 3, úloha 15');
+  assert.equal(sourceText('skripta, kap. 12, úkol a)', 'sk-12-a'), 'skripta, kap. 12, úkol a)');
+});
